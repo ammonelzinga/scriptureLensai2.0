@@ -1,0 +1,38 @@
+{
+  "name": "scripturelens-ai",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "node -e \"try{require('fs').mkdirSync('supabase',{recursive:true})}catch(e){}\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.48.1",
+    "classnames": "^2.5.1",
+    "framer-motion": "^11.2.10",
+    "lucide-react": "^0.468.0",
+    "next": "^14.2.15",
+    "next-themes": "^0.3.0",
+    "openai": "^4.67.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.15",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.5.4"
+  }
+}

@@ -1,0 +1,80 @@
+# === Node & Package Manager ===
+node_modules/
+.pnp/
+.pnp.js
+
+# === Build & Output ===
+.next/
+out/
+dist/
+build/
+coverage/
+.vercel/
+
+# === Logs & Debug ===
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# === Caches ===
+.cache/
+.eslintcache
+.stylelintcache
+.npm/
+.parcel-cache/
+.turbo/
+# Supabase local function build cache
+supabase/.temp/
+.supabase/functions/.temp/
+
+# === Environment Files ===
+.env
+.env.*
+.env.example
+# If you keep local-only override, uncomment next line
+# .env.local
+
+# === OS / Editor Artifacts ===
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.orig
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+
+# === TypeScript / Diagnostics ===
+*.tsbuildinfo
+
+# === Azure Dev / Optional ===
+# Ignore azd environment state; keep azure.yaml
+.azure/
+
+# === Misc ===
+*.tgz
+*.patch
+*.bak
+
+# === Prisma (if used) ===
+# prisma/migrations/*
+# !prisma/migrations/README.md
+
+# === Lockfile backups ===
+package-lock.json.*
+yarn.lock.*
+pnpm-lock.yaml.*
+
+# === Local data / temp ===
+tmp/
+.temp/
+
+# === Git merge artifacts ===
+*.rej
+*.un~
