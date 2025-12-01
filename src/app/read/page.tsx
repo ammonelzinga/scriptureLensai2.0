@@ -2,14 +2,15 @@
 import { NavigationTree } from '@/components/NavigationTree'
 import { ScripturePane } from '@/components/ScripturePane'
 import { useReaderStore } from '@/store/reader'
+import type { ReaderState } from '@/store/reader'
 import { useEffect } from 'react'
 
 export default function ReadPage() {
-  const setLeft = useReaderStore(s => s.setLeft)
-  const setRight = useReaderStore(s => s.setRight)
-  const setHighlights = useReaderStore(s => s.setHighlights)
-  const showVerseDetails = useReaderStore(s => s.showVerseDetails)
-  const toggleVerseDetails = useReaderStore(s => s.toggleVerseDetails)
+  const setLeft = useReaderStore((s: ReaderState) => s.setLeft)
+  const setRight = useReaderStore((s: ReaderState) => s.setRight)
+  const setHighlights = useReaderStore((s: ReaderState) => s.setHighlights)
+  const showVerseDetails = useReaderStore((s: ReaderState) => s.showVerseDetails)
+  const toggleVerseDetails = useReaderStore((s: ReaderState) => s.toggleVerseDetails)
   useEffect(() => {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)

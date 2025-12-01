@@ -6,7 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase'
  * Supports `mode`: 'verses' | 'chapters', optional `bookId`, and `minSimilarity`.
  */
 export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => ({})) as {
+  const body = (await req.json().catch(() => ({}))) as {
     query?: string
     topK?: number
     mode?: 'verses' | 'chapters'
@@ -14,11 +14,12 @@ export async function POST(req: NextRequest) {
     minSimilarity?: number
   }
 
-  const query = (body.query ?? '').trim()
+  const queryRaw = body.query ?? ''
+  const query = queryRaw.replace(/\s+/g, ' ').trim()
   const topK = body.topK ?? 20
   const mode = body.mode ?? 'verses'
   const bookId = body.bookId
-  const minSimilarity = body.minSimilarity ?? 0.2
+  const minSimilarity = Math.max(0, Math.min(1, body.minSimilarity ?? 0.1))
 
   if (!query || query.length < 2) {
     return NextResponse.json({ error: 'Query string required' }, { status: 400 })
@@ -35,10 +36,10 @@ export async function POST(req: NextRequest) {
       const like = `%${query}%`
       const { data: byPhrase } = await sb
         .from('verses')
-        .select('id, seq, text, chapter_id')
+        .select('id, book_id, chapter_seq, verse_seq, text')
         .ilike('text', like)
         .limit(topK)
-      let verses = byPhrase || []
+      let verses: any[] = byPhrase || []
 
       // Fallback 2: word-level OR ILIKE
       if (!verses.length) {
@@ -50,48 +51,103 @@ export async function POST(req: NextRequest) {
           const orExpr = words.map((w) => `text.ilike.${w}`).join(',')
           const { data: byWords } = await sb
             .from('verses')
-            .select('id, seq, text, chapter_id')
+            .select('id, book_id, chapter_seq, verse_seq, text')
             .or(orExpr)
             .limit(topK)
-          verses = byWords || []
+          verses = (byWords as any[]) || []
         }
       }
+
+      // Fallback 3: chunk text ILIKE -> verses in matched chunks
+      if (!verses.length) {
+        const { data: chunks } = await sb
+          .from('embedding_chunks')
+          .select('id')
+          .ilike('combined_text', `%${query}%`)
+          .limit(topK * 2)
+        const chunkIds = (chunks || []).map((c: any) => c.id)
+        if (chunkIds.length) {
+          const { data: versesFromChunks } = await sb
+            .from('verses')
+            .select('id, book_id, chapter_seq, verse_seq, text')
+            .in('chunk_id', chunkIds)
+            .ilike('text', `%${query}%`)
+            .limit(topK)
+          verses = (versesFromChunks as any[]) || []
+        }
+      }
+
+      // Optional book filter early
+      if (bookId && verses.length) {
+        verses = verses.filter((v: any) => v.book_id === bookId)
+      }
+
       // Enrich verses with chapter + book info for reference formatting
       if (verses.length) {
-        const chapterIds = Array.from(new Set(verses.map(v => v.chapter_id)))
+        const bookIdsSet = new Set<string>(verses.map((v: any) => v.book_id))
+        const bookIdsArr = Array.from(bookIdsSet)
         const { data: chaptersInfo } = await sb
           .from('chapters')
           .select('id, seq, book_id')
-          .in('id', chapterIds)
-        const bookIds = Array.from(new Set((chaptersInfo || []).map((c: any) => c.book_id)))
-        let booksInfo: any[] = []
-        if (bookIds.length) {
-          const { data: booksData } = await sb
-            .from('books')
-            .select('id, title')
-            .in('id', bookIds)
-          booksInfo = booksData || []
-        }
-        const chaptersMap = new Map((chaptersInfo || []).map((c: any) => [c.id, c]))
-        const booksMap = new Map(booksInfo.map((b: any) => [b.id, b]))
-        verses = verses.map(v => {
-          const ch = chaptersMap.get(v.chapter_id)
-          const bk = ch ? booksMap.get(ch.book_id) : null
+          .in('book_id', bookIdsArr)
+        const { data: booksData } = await sb
+          .from('books')
+          .select('id, title')
+          .in('id', bookIdsArr)
+        const chaptersMap = new Map<string, any>((chaptersInfo || []).map((c: any) => [`${c.book_id}:${c.seq}`, c]))
+        const booksMap = new Map<string, any>((booksData || []).map((b: any) => [b.id, b]))
+        verses = verses.map((v: any) => {
+          const ch = chaptersMap.get(`${v.book_id}:${v.chapter_seq}`)
+          const bk = booksMap.get(v.book_id)
           return {
-            ...v,
-            chapter_seq: ch?.seq,
-            book_id: ch?.book_id,
-            book_title: bk?.title
+            id: v.id,
+            text: v.text,
+            similarity: null as any,
+            book_id: v.book_id,
+            book_title: bk?.title || null,
+            chapter_id: ch?.id || null,
+            chapter_seq: v.chapter_seq,
+            seq: v.verse_seq,
           }
         })
       }
+
+      // Last resort: if still empty, try RPC with first word only
+      if (!verses.length) {
+        const first = query.split(/\s+/)[0]
+        if (first) {
+          const { data: byFirst } = await sb.rpc('lexical_search_verses', { q: first, match_count: topK })
+          const rows = (byFirst as Array<{ verse_id: string; book_id: string; chapter_seq: number; verse_seq: number; text: string; similarity: number }>) || []
+          if (rows.length) {
+            const mapped = rows.map((r) => ({
+              id: r.verse_id,
+              text: r.text,
+              similarity: r.similarity,
+              book_id: r.book_id,
+              book_title: null,
+              chapter_id: null,
+              chapter_seq: r.chapter_seq,
+              seq: r.verse_seq,
+            }))
+            return NextResponse.json({ results: mapped.slice(0, topK), mode })
+          }
+        }
+      }
+
       return NextResponse.json({ results: verses, mode })
     }
 
     // Enrich RPC rows (verse_id, book_id, chapter_seq, verse_seq, text, similarity)
-    const rows = results as Array<{ verse_id: string; book_id: string; chapter_seq: number; verse_seq: number; text: string; similarity: number }>
-    const bookIds = Array.from(new Set(rows.map(r => r.book_id)))
-    // Fetch chapters for these books to resolve chapter IDs
+    const rows = results as Array<{
+      verse_id: string
+      book_id: string
+      chapter_seq: number
+      verse_seq: number
+      text: string
+      similarity: number
+    }>
+    const bookIds = Array.from(new Set(rows.map((r) => r.book_id)))
+    // Resolve chapter IDs by (book_id, chapter_seq)
     const { data: chAll } = await sb
       .from('chapters')
       .select('id, book_id, seq')
@@ -106,7 +162,7 @@ export async function POST(req: NextRequest) {
       .in('id', bookIds)
     const booksMap = new Map<string, any>((booksInfo || []).map((b: any) => [b.id, b]))
 
-    let enriched = rows.map(r => {
+    let enriched = rows.map((r) => {
       const ch = chapterMap.get(chapterKey(r.book_id, r.chapter_seq))
       const bk = booksMap.get(r.book_id)
       return {
@@ -120,12 +176,15 @@ export async function POST(req: NextRequest) {
         seq: r.verse_seq,
       }
     })
-    if (bookId) enriched = enriched.filter(r => r.book_id === bookId)
-    enriched = enriched.filter(r => (r.similarity ?? 0) >= minSimilarity)
+    if (bookId) enriched = enriched.filter((r) => r.book_id === bookId)
+    // If nothing passes the threshold, return the topK without filtering to avoid empty results
+    const filtered = enriched.filter((r) => (r.similarity ?? 0) >= minSimilarity)
+    enriched = filtered.length ? filtered : enriched.slice(0, topK)
     return NextResponse.json({ results: enriched, mode })
   }
 
   // Chapters mode
+  // Note: lexical_search_chapters RPC may not exist; fall back if RPC errors
   const { data: dataCh, error: errCh } = await sb.rpc('lexical_search_chapters', { q: query, match_count: topK })
   let chaptersRes = dataCh || []
 
@@ -158,12 +217,12 @@ export async function POST(req: NextRequest) {
     if (!chapters.length && words.length) {
       const orBooks = words.map((w) => `title.ilike.${w}`).join(',')
       const { data: booksMatch } = await sb.from('books').select('id').or(orBooks).limit(5)
-      const bookIds = (booksMatch || []).map((b: any) => b.id)
-      if (bookIds.length) {
+      const byBookIds = (booksMatch || []).map((b: any) => b.id)
+      if (byBookIds.length) {
         const { data: chByBooks } = await sb
           .from('chapters')
           .select('id, seq, title, book_id')
-          .in('book_id', bookIds)
+          .in('book_id', byBookIds)
           .limit(topK)
         chapters = chByBooks || []
       }
@@ -192,6 +251,8 @@ export async function POST(req: NextRequest) {
   }
 
   if (bookId) chaptersRes = chaptersRes.filter((r: any) => r.book_id === bookId)
-  chaptersRes = chaptersRes.filter((r: any) => (r.similarity ?? 0) >= minSimilarity)
+  // Apply threshold with fallback to topK
+  const chFiltered = chaptersRes.filter((r: any) => (r.similarity ?? 0) >= minSimilarity)
+  chaptersRes = chFiltered.length ? chFiltered : (chaptersRes as any[]).slice(0, topK)
   return NextResponse.json({ results: chaptersRes, mode })
 }

@@ -4,7 +4,7 @@ import { chatSummary } from '@/lib/openai'
 
 // Similar verses given a verseId using chunk-level embeddings
 export async function POST(req: NextRequest) {
-  const { verseId, topK = 10 } = await req.json()
+  const { verseId, topK = 10, excludeSelf = false } = await req.json()
   if (!verseId) return NextResponse.json({ error: 'Missing verseId' }, { status: 400 })
   const sb = supabaseAdmin()
 
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   const { data: target } = await sb.from('verses').select('id, text').eq('id', verseId).maybeSingle()
 
   // Use RPC to find similar verses via the verse's chunk embedding
-  const { data, error } = await sb.rpc('semantic_search_by_verse', { verse_uuid: verseId, match_count: topK })
+  const { data, error } = await sb.rpc('semantic_search_by_verse', { verse_uuid: verseId, match_count: topK, exclude_self: !!excludeSelf ? true : false })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   const rows = (data || []) as Array<{ verse_id: string; book_id: string; chapter_seq: number; verse_seq: number; text: string; chunk_score: number }>
 

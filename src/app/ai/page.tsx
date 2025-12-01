@@ -12,6 +12,9 @@ export default function AIPage() {
         <SimilarTextsCard />
         <ExplainPanel />
       </div>
+      <div className="grid lg:grid-cols-2 gap-6">
+        <TopicFinderCard />
+      </div>
     </div>
   )
 }
@@ -165,6 +168,73 @@ function LexicalSearchCard() {
           })}
         </ul>
       )}
+    </div>
+  )
+}
+
+function TopicFinderCard() {
+  const [q, setQ] = useState('What Old Testament prophecies did Jesus Christ fulfill?')
+  const [busy, setBusy] = useState(false)
+  const [data, setData] = useState<any>(null)
+  const [topK, setTopK] = useState<number>(12)
+  const [hybrid, setHybrid] = useState<boolean>(true)
+  const [books, setBooks] = useState<any[]>([])
+  const [pairGospels, setPairGospels] = useState<boolean>(true)
+  useEffect(()=>{ fetch('/api/catalog/books').then(r=>r.json()).then(j=>setBooks(j.books||[])) },[])
+
+  const run = async () => {
+    setBusy(true)
+    try {
+      const res = await fetch('/api/search/topic',{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question: q, topK, hybrid, focus: 'prophecies-fulfilled', pairGospels }) })
+      const json = await res.json(); setData(json)
+    } finally { setBusy(false) }
+  }
+  return (
+    <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+      <h2 className="font-medium">Topic Finder (Prophecies)</h2>
+      <p className="text-sm text-zinc-500">Find chunked passages for thematic questions (prophecies, fulfillments).</p>
+      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-start">
+        <div className="col-span-1 sm:col-span-2 lg:col-span-4">
+          <input value={q} onChange={e=>setQ(e.target.value)} className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-sm" />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-zinc-600 dark:text-zinc-400">Results</label>
+          <select value={topK} onChange={e=>setTopK(Number(e.target.value))} className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 px-2 py-2 text-sm">
+            {[8,12,16,20,30].map(n=> <option key={n} value={n}>{n}</option>)}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-zinc-600 dark:text-zinc-400">Hybrid</label>
+          <input type="checkbox" checked={hybrid} onChange={e=>setHybrid(e.target.checked)} />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-zinc-600 dark:text-zinc-400">Pair OT→Gospels</label>
+          <input type="checkbox" checked={pairGospels} onChange={e=>setPairGospels(e.target.checked)} />
+        </div>
+        <div>
+          <button disabled={!q||busy} onClick={run} className="w-full rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50">{busy?'Searching…':'Search'}</button>
+        </div>
+      </div>
+      {data?.pairs && data.pairs.length>0 && (
+        <div className="mt-4 space-y-2">
+          <h3 className="font-medium text-sm">Curated Pairings (OT → Gospel)</h3>
+          <ul className="space-y-2">
+            {data.pairs.map((p:any,i:number)=> (
+              <li key={i} className="grid md:grid-cols-2 gap-2">
+                <div className="rounded-md border border-zinc-200 dark:border-zinc-800 p-2">
+                  <div className="text-xs font-medium mb-1">Source (OT)</div>
+                  <ChunkCards books={books} chunks={[p.source]} devtools={false} pinVerseId={''} />
+                </div>
+                <div className="rounded-md border border-zinc-200 dark:border-zinc-800 p-2">
+                  <div className="text-xs font-medium mb-1">Target (Gospel)</div>
+                  <ChunkCards books={books} chunks={[p.target]} devtools={false} pinVerseId={''} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {data?.chunks && <ChunkCards books={books} chunks={data.chunks} devtools={false} pinVerseId={''} />}
     </div>
   )
 }
@@ -516,6 +586,7 @@ function AskQuestionCard() {
   const [hybrid, setHybrid] = useState<boolean>(true)
   const [showExpanded, setShowExpanded] = useState<boolean>(false)
   const [pinVerseId, setPinVerseId] = useState<string>('')
+  const [lexicalWeight, setLexicalWeight] = useState<number>(0.15)
 
   useEffect(() => { fetch('/api/catalog/works').then(r=>r.json()).then(j=>setWorks(j.works||[])) }, [])
   // Load persisted toggles
@@ -582,7 +653,8 @@ function AskQuestionCard() {
     setBusy(true)
     try {
       const unlimited = topK === 'all'
-      const payload: any = { question: q, topK: unlimited ? -1 : Number(topK), versePerChapter: versesPerChapter, hybrid }
+      const payload: any = { question: q, topK: unlimited ? -1 : Number(topK), versesPerChapter: versesPerChapter, hybrid }
+      if (hybrid) payload.lexicalWeight = lexicalWeight
       const pinTrim = pinVerseId.trim()
       if (pinTrim) payload.verseId = pinTrim
       if (testament) payload.testament = testament
@@ -637,6 +709,11 @@ function AskQuestionCard() {
             <label className="flex items-center gap-1">
               <input type="checkbox" checked={showExpanded} onChange={e=>setShowExpanded(e.target.checked)} /> Show expanded query
             </label>
+            <div className="flex items-center gap-2">
+              <span>Lexical weight</span>
+              <input type="range" min={0} max={0.5} step={0.01} value={lexicalWeight} onChange={e=>setLexicalWeight(Number(e.target.value))} disabled={!hybrid} />
+              <span className="tabular-nums">{lexicalWeight.toFixed(2)}</span>
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -722,46 +799,47 @@ function AskQuestionCard() {
       {data?.overview && (
         <p className="mt-3 text-sm italic">{data.overview}</p>
       )}
-      {data?.results && (
-        <ul className="mt-3 space-y-2 text-sm">
-          {data.results.map((r:any,i:number)=>(
-            <li key={i} className="rounded-md border border-zinc-200 dark:border-zinc-800 p-2">
-              <div className="flex items-center justify-between">
-                <div className="font-medium flex items-center gap-2">
-                  <span>
-                    {(() => {
-                      const b = books.find(bk => bk.id === r.chapter.book_id)
-                      const bookLabel = b ? b.title : (r.chapter.book_title || 'Book')
-                      const chapLabel = r.chapter.seq ? `Chapter ${r.chapter.seq}` : (r.chapter.title || 'Chapter')
-                      return `${bookLabel} — ${chapLabel}`
-                    })()}
-                  </span>
-                  {pinVerseId && (() => {
-                    const pinTrim = pinVerseId.trim()
-                    const pinned = r.verses.find((v:any)=> String(v.id) === pinTrim)
-                    if (!pinned) return null
-                    const simNum = Number(pinned.similarity)
-                    const display = Number.isFinite(simNum) ? simNum.toFixed(4) : '0.0000'
-                    return (
-                      <span className="text-[11px] text-zinc-500">pinned sim: {display}</span>
-                    )
-                  })()}
-                  {devtools && typeof r.score === 'number' && (
-                    <span className="text-[11px] text-zinc-500">similarity: {r.score.toFixed(4)}</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-[10px]">
-                  <a href={`/read?chapterId=${encodeURIComponent(r.chapter.id)}&highlight=${encodeURIComponent(r.verses.map((v:any)=>v.id).join(','))}`} className="underline">Open</a>
-                  <button type="button" onClick={()=>navigator.clipboard?.writeText(String(r.chapter.id))} className="underline">Copy ID</button>
-                </div>
+      {data?.chunks && (
+        <ChunkCards books={books} chunks={data.chunks} devtools={devtools} pinVerseId={pinVerseId} />
+      )}
+    </div>
+  )
+}
+
+function ChunkCards({ books, chunks, devtools, pinVerseId }:{ books:any[]; chunks:any[]; devtools:boolean; pinVerseId:string }){
+  const [open, setOpen] = useState<Record<string, boolean>>({})
+  const toggle = (id:string) => setOpen(s => ({...s, [id]: !s[id]}))
+  return (
+    <ul className="mt-3 space-y-2 text-sm">
+      {chunks.map((c:any,i:number)=>{
+        const id = c.chunk.id
+        const b = books.find(bk => bk.id === c.chunk.book_id)
+        const bookLabel = b ? b.title : (c.chunk.book_title || 'Book')
+        const chRange = c.chunk.start_chapter === c.chunk.end_chapter || !c.chunk.end_chapter
+          ? `Chapter ${c.chunk.start_chapter}`
+          : `Chapters ${c.chunk.start_chapter}–${c.chunk.end_chapter}`
+        const highlight = c.verses.map((v:any)=>v.id).join(',')
+        const openLink = `/read?bookId=${encodeURIComponent(c.chunk.book_id)}&chapter=${encodeURIComponent(c.verses[0]?.chapter_seq||c.chunk.start_chapter||1)}&highlight=${encodeURIComponent(highlight)}`
+        return (
+          <li key={id || i} className="rounded-md border border-zinc-200 dark:border-zinc-800">
+            <div className="p-2 flex items-center justify-between">
+              <div className="font-medium flex items-center gap-2">
+                <span>{bookLabel} — {chRange}</span>
+                {devtools && typeof c.score === 'number' && (
+                  <span className="text-[11px] text-zinc-500">similarity: {c.score.toFixed(4)}</span>
+                )}
               </div>
-              <div className="text-zinc-600 dark:text-zinc-400">
-                {r.verses.map((v:any, idx:number)=> {
-                  const b = books.find(bk => bk.id === r.chapter.book_id);
-                  const bookLabel = b ? b.title : (r.chapter.book_title || 'Book');
-                  const chapSeq = r.chapter.seq;
-                  const verseSeq = v.seq;
-                  const ref = bookLabel && chapSeq && verseSeq ? `${bookLabel} ${chapSeq}:${verseSeq}` : '';
+              <div className="flex items-center gap-2 text-[10px]">
+                <a href={openLink} className="underline">Open</a>
+                <button type="button" onClick={()=>navigator.clipboard?.writeText(String(c.combined_text || ''))} className="underline">Copy text</button>
+                <button type="button" onClick={()=>navigator.clipboard?.writeText(String(id))} className="underline">Copy ID</button>
+                <button type="button" onClick={()=>toggle(id)} className="underline">{open[id]?'Hide':'Show'} text</button>
+              </div>
+            </div>
+            <div className="px-2 pb-2 text-zinc-600 dark:text-zinc-400">
+              <div>
+                {c.verses.map((v:any, idx:number)=>{
+                  const ref = bookLabel && v.chapter_seq && v.seq ? `${bookLabel} ${v.chapter_seq}:${v.seq}` : ''
                   return (
                     <span key={v.id || idx} className="inline-block mr-2">
                       <span className="font-medium text-[11px] mr-1 text-zinc-500">{ref}</span>
@@ -777,10 +855,13 @@ function AskQuestionCard() {
                   )
                 })}
               </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+              {open[id] && (
+                <div className="mt-2 whitespace-pre-wrap leading-relaxed">{c.combined_text}</div>
+              )}
+            </div>
+          </li>
+        )
+      })}
+    </ul>
   )
 }

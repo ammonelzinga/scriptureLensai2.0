@@ -97,13 +97,20 @@ create index if not exists verses_text_trgm_idx on verses using gin (text gin_tr
 -- =============================================
 -- Return matching chunk IDs with similarity score (cosine)
 create or replace function match_embedding_chunks(query_embedding vector(512), match_count int default 10)
-returns table (chunk_id uuid, score float)
-language sql stable as $$
+returns table (chunk_id uuid, score double precision)
+language plpgsql stable as $$
+begin
+  -- Improve recall for IVFFLAT by increasing probes (approximate → closer to exact)
+  -- Ensures parent chunk is far less likely to be missed
+  perform set_config('ivfflat.probes', greatest(10, match_count)::text, true);
+
+  return query
   select c.id as chunk_id,
          1 - (c.embedding <=> query_embedding) as score
   from embedding_chunks c
   order by c.embedding <=> query_embedding
-  limit match_count
+  limit match_count;
+end;
 $$;
 
 -- Expand chunks into verses ranked by chunk similarity; optionally include lexical similarity
@@ -120,11 +127,16 @@ returns table (
   verse_seq int,
   text text,
   chunk_id uuid,
-  chunk_score float,
-  lexical_score float,
-  combined_score float
+  chunk_score double precision,
+  lexical_score double precision,
+  combined_score double precision
 )
-language sql stable as $$
+language plpgsql stable as $$
+begin
+  -- Improve recall for IVFFLAT by increasing probes
+  perform set_config('ivfflat.probes', greatest(10, match_count * 2)::text, true);
+
+  return query
   with chunk_matches as (
     select id, 1 - (embedding <=> query_embedding) as score
     from embedding_chunks
@@ -138,12 +150,13 @@ language sql stable as $$
          v.text,
          v.chunk_id,
          cm.score as chunk_score,
-         case when include_lexical and lexical_text is not null then similarity(v.text, lexical_text) else 0 end as lexical_score,
-         cm.score + (case when include_lexical and lexical_text is not null then similarity(v.text, lexical_text) * 0.15 else 0 end) as combined_score
+         case when include_lexical and lexical_text is not null then similarity(v.text, lexical_text) else 0::double precision end as lexical_score,
+         cm.score + (case when include_lexical and lexical_text is not null then similarity(v.text, lexical_text) * 0.15 else 0::double precision end) as combined_score
   from verses v
   join chunk_matches cm on cm.id = v.chunk_id
   order by combined_score desc
-  limit match_count
+  limit match_count;
+end;
 $$;
 
 -- Given a verse id, search for similar verses via its chunk embedding (self-exclusion optional)
@@ -160,9 +173,14 @@ returns table (
   text text,
   source_chunk uuid,
   match_chunk uuid,
-  chunk_score float
+  chunk_score double precision
 )
-language sql stable as $$
+language plpgsql stable as $$
+begin
+  -- Improve recall for IVFFLAT by increasing probes
+  perform set_config('ivfflat.probes', greatest(10, match_count * 2)::text, true);
+
+  return query
   with src as (
     select v.id as verse_id, c.embedding, v.chunk_id
     from verses v
@@ -186,7 +204,8 @@ language sql stable as $$
   join chunk_neighbors cn on cn.id = v.chunk_id
   where not (exclude_self and v.id = verse_uuid)
   order by chunk_score desc
-  limit match_count
+  limit match_count;
+end;
 $$;
 
 -- Simple lexical verse search (trigram)

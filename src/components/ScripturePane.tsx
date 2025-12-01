@@ -2,19 +2,29 @@
 import { useEffect, useState } from 'react'
 import { supabaseBrowser } from '@/lib/supabase'
 import { useReaderStore } from '@/store/reader'
+import type { ReaderState } from '@/store/reader'
 
 type VerseRow = { id: string; book_id: string; chapter_seq: number; verse_seq: number; text: string; chunk_id: string }
 type ChapterRow = { id: string; title: string | null; seq: number; book_id: string }
 
 export function ScripturePane({ side }: { side: 'left' | 'right' }) {
-  const chapterId = useReaderStore(s => side === 'left' ? s.leftChapterId : s.rightChapterId)
-  const highlights = useReaderStore(s => s.highlightVerseIds)
-  const showDetails = useReaderStore(s => s.showVerseDetails)
+  const chapterId = useReaderStore((s: ReaderState) => side === 'left' ? s.leftChapterId : s.rightChapterId)
+  const highlights = useReaderStore((s: ReaderState) => s.highlightVerseIds)
+  const showDetails = useReaderStore((s: ReaderState) => s.showVerseDetails)
+  const cacheChapter = useReaderStore((s: ReaderState) => s.cacheChapter)
+  const getCachedChapter = useReaderStore((s: ReaderState) => s.getCachedChapter)
   const [chapter, setChapter] = useState<ChapterRow | null>(null)
   const [verses, setVerses] = useState<VerseRow[]>([])
 
   useEffect(() => {
     if (!chapterId) { setChapter(null); setVerses([]); return }
+    // Try cache first to avoid refetching on navigation back to /read
+    const cached = getCachedChapter(chapterId)
+    if (cached) {
+      setChapter(cached.chapter)
+      setVerses(cached.verses as any)
+      return
+    }
     const sb = supabaseBrowser()
     sb.from('chapters').select('id, title, seq, book_id').eq('id', chapterId).single().then(({ data }) => {
       setChapter(data as any)
@@ -25,7 +35,11 @@ export function ScripturePane({ side }: { side: 'left' | 'right' }) {
           .eq('book_id', ch.book_id)
           .eq('chapter_seq', ch.seq)
           .order('verse_seq', { ascending: true })
-          .then(({ data }) => setVerses((data as any) || []))
+          .then(({ data }) => {
+            const list = (data as any) || []
+            setVerses(list)
+            cacheChapter(chapterId, ch, list)
+          })
       } else {
         setVerses([])
       }
