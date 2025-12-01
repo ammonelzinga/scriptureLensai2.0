@@ -1,11 +1,11 @@
-# ScriptureLens AI
+# ScriptureLens AI (Chunk Embedding Architecture)
 
-A Scripture Comparison & AI Study Platform for viewing, comparing, uploading, and analyzing scriptural texts across traditions.
+Clean rebuilt system using chunk-level (3–10 verses) 512‑dim embeddings (OpenAI `text-embedding-3-small` with dimensions=512). Chapters no longer store embeddings; all semantic search flows reference `embedding_chunks` joined back to `verses`.
 
 - Two-pane reader with hierarchical navigation tree
-- Verse-level “Find Related Scriptures” via embeddings
-- Admin upload with auto-parsing and auto-generated verses
-- AI tools: Similar Texts, Semantic Topic Explorer
+- Verse-level similarity based on chunk embeddings
+- Admin ingestion pipeline (raw KJV → parsed JSON → semantic chunking → embeddings → Supabase)
+- AI tools: Semantic verse search & similarity by verse ID
 
 ## Quick Start (Windows PowerShell)
 
@@ -31,7 +31,10 @@ Copy-Item .env.example .env.local
 
 4) Initialize Supabase schema
 
-- Using Supabase SQL editor or CLI, run the SQL in `supabase/schema.sql` on your project database.
+Run the SQL in `supabase/schema.sql` (new architecture). This creates:
+* `embedding_chunks` (vector(512)) storing combined text + verse/chapter arrays
+* `verses` referencing `chunk_id`
+* Helper RPC functions: `semantic_search_verses`, `semantic_search_by_verse`, `lexical_search_verses`, `match_embedding_chunks`
 
 5) Run the dev server
 
@@ -48,23 +51,29 @@ Open http://localhost:3000
 - `/upload` — Admin upload (password: `searchponderpray` by default; configurable via env)
 - `/ai` — AI tools (Similar Texts & Ask a Question)
 
-## Data Model
+## Data Model (Updated)
 
 Tables (see `supabase/schema.sql`):
-- `traditions(id, name)` — e.g., Christian, Ancient Egyptian
-- `sources(id, tradition_id, name)` — e.g., Church of Jesus Christ of LDS, Historical Writings
-- `works(id, source_id, name, abbrev)` — e.g., Book of Mormon, Jewish War
-- `books(id, work_id, seq, title)` — optional layer for works with named books
-- `chapters(id, work_id, book_id?, seq, title, embedding vector(1536))`
-- `verses(id, chapter_id, seq, text, embedding vector(1536))`
+* `traditions(id, name)`
+* `sources(id, tradition_id, name)`
+* `works(id, source_id, name, abbrev)`
+* `books(id, work_id, seq, title)`
+* `chapters(id, book_id, seq, title)` — NO embeddings stored here now.
+* `embedding_chunks(id, book_id, start_chapter, end_chapter, verse_numbers[], chapter_numbers[], combined_text, embedding vector(512))`
+* `verses(id, book_id, chapter_seq, verse_seq, text, chunk_id)`
 
-Indexes and RPCs:
-- pgvector `ivfflat` indexes on chapter and verse embeddings
-- `match_chapters(query_embedding, match_count)` for similarity search
+Indexes:
+* ivfflat on `embedding_chunks(embedding vector_cosine_ops)`
+* GIN trigram on `verses.text` & chapters.title
+* Narrow indexes on foreign key columns for joins
 
-RLS:
-- Public read policies enabled for all tables
-- No anon write policies; server-side writes use `SUPABASE_SERVICE_ROLE_KEY` (service role bypasses RLS)
+RPC Functions:
+* `match_embedding_chunks(query_embedding)` — raw chunk scores
+* `semantic_search_verses(query_embedding, include_lexical, lexical_text)` — hybrid ranking (chunk similarity + optional lexical 15% boost)
+* `semantic_search_by_verse(verse_uuid)` — uses source verse's chunk embedding for neighbors
+* `lexical_search_verses(q)` — trigram search only
+
+RLS: Public read policies only; writes performed by edge function or ingestion pipeline via service role.
 
 ## Architecture
 
@@ -79,15 +88,16 @@ Key folders:
 - `scripts/*` — Maintenance scripts (e.g., `backfill-embeddings.ts`)
 - `supabase/schema.sql` — Database schema, indexes, and RPCs
 
-### Upload & Embedding Flow
+### Ingestion & Chunking Flow (New)
 
-1. Admin fills path (tradition → source → work → optional book) and uploads EITHER plain text or JSON
-2. API `/api/upload`:
-    - Upserts hierarchy rows
-    - If `text` provided: parses into chapters & verses
-    - If `book` JSON provided: uses supplied chapter/verse numbers directly
-    - Inserts chapters and verses
-    - Generates embeddings for each verse and the full chapter (Edge Function batching)
+Run `scripts/ingest_pipeline.ts` against a master KJV file:
+1. Parse file into structured verses per book/chapter.
+2. For each chapter call GPT (prompt constant `CHUNKING_PROMPT`) to produce semantic chunks (3–10 verses).
+3. Persist per-book raw structure to `data/books/<Book>.json`.
+4. Persist chunk structure to `data/chunks/<Book>.json`.
+5. Embed each chunk (512 dims) & insert `embedding_chunks` rows.
+6. Upsert verses referencing `chunk_id`.
+7. Idempotent: verses upsert; existing chunks optionally skipped unless `--force`.
 
 JSON book upload example:
 ```json
@@ -103,15 +113,15 @@ JSON book upload example:
 ```
 Header: `x-upload-password: <UPLOAD_PASSWORD>`
 
-### Similarity Search Flow (Verse-Level)
+### Semantic Search Flow (Chunk-Based)
 
-1. User clicks “Find Related Scriptures” on a verse in the reader
-2. API `/api/search/similar`:
-   - Retrieves verse embedding
-   - Finds top-N similar chapters via pgvector
-   - Scores verses within each top chapter
-   - Returns suggested chapters, verses, and a short GPT summary
-3. Reader highlights returned verse IDs in the opposite pane
+1. User issues query → API `/api/search/semantic`.
+2. Query embedded (512 dims).
+3. RPC `semantic_search_verses` ranks chunks then expands verses.
+4. Optional lexical re-rank (trigram similarity) with 0.15 weight.
+5. Returns verse-level results with scores.
+
+Similarity by verse ID uses RPC `semantic_search_by_verse` (source verse's chunk embedding).
 
 ### Semantic Topic Explorer (Q&A)
 
@@ -134,56 +144,52 @@ node --loader ts-node/esm scripts/backfill-embeddings.ts
 ```
 Or compile with `tsc` and run the emitted JS.
 
-### Edge Function (Batch Embeddings)
+### Edge Function (Search)
 
-Supabase Edge Function provided at `supabase/functions/embedding` for batching verse/chapter embeddings.
+`supabase/functions/embedding` now performs semantic / lexical / hybrid searches:
 
+Request body examples:
+```json
+{ "query": "love thy neighbour", "mode": "hybrid", "topK": 30 }
+{ "verseId": "<uuid>", "mode": "semantic", "topK": 25 }
+{ "query": "faith hope charity", "mode": "lexical" }
+```
 Deploy:
 ```powershell
 supabase functions deploy embedding --no-verify-jwt
 ```
-
-Invoke example (PowerShell):
+Invoke:
 ```powershell
 curl -X POST "$env:SUPABASE_URL/functions/v1/embedding" `
    -H "Authorization: Bearer $env:SUPABASE_SERVICE_ROLE_KEY" `
    -H "Content-Type: application/json" `
-   -d '{"verses":[{"id":"v1","text":"In the beginning..."}],"chapters":[{"id":"c1","text":"Full chapter text..."}]}'
+   -d '{"query":"endure to the end","mode":"hybrid","topK":20}'
 ```
 
-You can replace direct OpenAI calls in the upload API with this Edge Function for isolation and rate management.
+### Running the Ingestion Pipeline
 
-### Verse Similarity RPC
-### Combined Similarity Endpoint
-
-API route: `POST /api/search/combined`
-
-Body example:
-```json
-{
-   "verseId": "<existing-verse-uuid>",
-   "chapterCount": 5,
-   "verseCount": 10
-}
+Prepare raw master text (e.g., `data/kjv_raw.txt`). Then:
+```powershell
+$env:OPENAI_API_KEY="sk-..."
+$env:SUPABASE_URL="https://xyz.supabase.co"
+$env:SUPABASE_SERVICE_ROLE_KEY="service-role-key"
+node --loader ts-node/esm scripts/ingest_pipeline.ts --bibleTxt data/kjv_raw.txt --workName "King James Bible"
 ```
-Or raw text:
-```json
-{
-   "text": "Faith hope charity enduring to the end",
-   "chapterCount": 5,
-   "verseCount": 10
-}
-```
-Returns:
-```json
-{
-   "chapters": [ { "id": "...", "similarity": 0.87, "text": "Chapter 1" } ],
-   "verses": [ { "id": "...", "parent_chapter": "...", "similarity": 0.92, "text": "Verse text" } ]
-}
-```
-Useful for unified relevance ranking using one embedding call.
+Options:
+* `--bookFilter Genesis` ingest only one book
+* `--dryRun` generate JSON but skip DB writes
+* `--force` re-embed/reinsert chunks
 
-Added `match_verses(query_embedding, match_count)` for fine-grained nearest verse queries. You can combine chapter + verse similarity for richer AI features.
+Outputs:
+* `data/books/<Book>.json`
+* `data/chunks/<Book>.json`
+
+### Performing Semantic Search (API Route)
+
+```powershell
+curl -X POST http://localhost:3000/api/search/semantic -H "Content-Type: application/json" -d '{"query":"charity never faileth","topK":15,"includeLexical":true}'
+```
+Returns: `{ "verses": [ { verse_id, text, chunk_score, lexical_score, combined_score } ] }`
 
 ## Production Considerations
 
@@ -199,7 +205,8 @@ Added `match_verses(query_embedding, match_count)` for fine-grained nearest vers
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anon key for client reads
 - `SUPABASE_SERVICE_ROLE_KEY`: Service role key for server writes/embeddings
 - `OPENAI_API_KEY`: OpenAI API key
-- `OPENAI_EMBEDDING_MODEL`: Defaults to `text-embedding-3-small` (1536 dims)
+-- `OPENAI_EMBEDDING_MODEL`: Defaults to `text-embedding-3-small`
+-- `OPENAI_EMBEDDING_DIMENSIONS`: Set to `512` (required for new architecture)
 - `OPENAI_CHAT_MODEL`: Defaults to `gpt-4.1`
 - `UPLOAD_PASSWORD`: Upload gate (default `searchponderpray`)
 
@@ -211,4 +218,4 @@ Added `match_verses(query_embedding, match_count)` for fine-grained nearest vers
 
 —
 
-ScriptureLens AI — “Search, Ponder, Pray, and Compare.”
+ScriptureLens AI — “Search, Ponder, Pray, and Compare.” (Chunk Embedding Edition)

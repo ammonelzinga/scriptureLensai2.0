@@ -1,0 +1,97 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [
+        46,
+        46,
+        46
+      ],
+      "verse_numbers": [
+        1,
+        2,
+        3
+      ],
+      "combined_text": "God is our refuge and strength, a very present help in trouble. Therefore will not we fear, though the earth be removed, and though the mountains be carried into the midst of the sea; Though the waters thereof roar and be troubled, though the mountains shake with the swelling thereof. Selah.",
+      "verses": [
+        {
+          "chapter": 46,
+          "verse": 1
+        },
+        {
+          "chapter": 46,
+          "verse": 2
+        },
+        {
+          "chapter": 46,
+          "verse": 3
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        46,
+        46,
+        46,
+        46
+      ],
+      "verse_numbers": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "combined_text": "There is a river, the streams whereof shall make glad the city of God, the holy place of the tabernacles of the most High. God is in the midst of her; she shall not be moved: God shall help her, and that right early. The heathen raged, the kingdoms were moved: he uttered his voice, the earth melted. The LORD of hosts is with us; the God of Jacob is our refuge. Selah.",
+      "verses": [
+        {
+          "chapter": 46,
+          "verse": 4
+        },
+        {
+          "chapter": 46,
+          "verse": 5
+        },
+        {
+          "chapter": 46,
+          "verse": 6
+        },
+        {
+          "chapter": 46,
+          "verse": 7
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        46,
+        46,
+        46,
+        46
+      ],
+      "verse_numbers": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "combined_text": "Come, behold the works of the LORD, what desolations he hath made in the earth. He maketh wars to cease unto the end of the earth; he breaketh the bow, and cutteth the spear in sunder; he burneth the chariot in the fire. Be still, and know that I am God: I will be exalted among the heathen, I will be exalted in the earth. The LORD of hosts is with us; the God of Jacob is our refuge. Selah.",
+      "verses": [
+        {
+          "chapter": 46,
+          "verse": 8
+        },
+        {
+          "chapter": 46,
+          "verse": 9
+        },
+        {
+          "chapter": 46,
+          "verse": 10
+        },
+        {
+          "chapter": 46,
+          "verse": 11
+        }
+      ]
+    }
+  ]
+}

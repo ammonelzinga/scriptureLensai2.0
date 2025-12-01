@@ -24,6 +24,7 @@
       "@/app/*": ["src/app/*"],
       "@/store/*": ["src/store/*"]
     },
+    "allowImportingTsExtensions": true,
     "plugins": [
       {
         "name": "next"

@@ -1,0 +1,142 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "verse_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "combined_text": "This know also, that in the last days perilous times shall come. For men shall be lovers of their own selves, covetous, boasters, proud, blasphemers, disobedient to parents, unthankful, unholy, Without natural affection, trucebreakers, false accusers, incontinent, fierce, despisers of those that are good, Traitors, heady, highminded, lovers of pleasures more than lovers of God; Having a form of godliness, but denying the power thereof: from such turn away.",
+      "verses": [
+        {
+          "chapter": 3,
+          "verse": 1
+        },
+        {
+          "chapter": 3,
+          "verse": 2
+        },
+        {
+          "chapter": 3,
+          "verse": 3
+        },
+        {
+          "chapter": 3,
+          "verse": 4
+        },
+        {
+          "chapter": 3,
+          "verse": 5
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "verse_numbers": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "combined_text": "For of this sort are they which creep into houses, and lead captive silly women laden with sins, led away with divers lusts, Ever learning, and never able to come to the knowledge of the truth. Now as Jannes and Jambres withstood Moses, so do these also resist the truth: men of corrupt minds, reprobate concerning the faith. But they shall proceed no further: for their folly shall be manifest unto all men, as their's also was.",
+      "verses": [
+        {
+          "chapter": 3,
+          "verse": 6
+        },
+        {
+          "chapter": 3,
+          "verse": 7
+        },
+        {
+          "chapter": 3,
+          "verse": 8
+        },
+        {
+          "chapter": 3,
+          "verse": 9
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "verse_numbers": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "combined_text": "But thou hast fully known my doctrine, manner of life, purpose, faith, longsuffering, charity, patience, Persecutions, afflictions, which came unto me at Antioch, at Iconium, at Lystra; what persecutions I endured: but out of them all the Lord delivered me. Yea, and all that will live godly in Christ Jesus shall suffer persecution. But evil men and seducers shall wax worse and worse, deceiving, and being deceived.",
+      "verses": [
+        {
+          "chapter": 3,
+          "verse": 10
+        },
+        {
+          "chapter": 3,
+          "verse": 11
+        },
+        {
+          "chapter": 3,
+          "verse": 12
+        },
+        {
+          "chapter": 3,
+          "verse": 13
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "verse_numbers": [
+        14,
+        15,
+        16,
+        17
+      ],
+      "combined_text": "But continue thou in the things which thou hast learned and hast been assured of, knowing of whom thou hast learned them; And that from a child thou hast known the holy scriptures, which are able to make thee wise unto salvation through faith which is in Christ Jesus. All scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness: That the man of God may be perfect, throughly furnished unto all good works.",
+      "verses": [
+        {
+          "chapter": 3,
+          "verse": 14
+        },
+        {
+          "chapter": 3,
+          "verse": 15
+        },
+        {
+          "chapter": 3,
+          "verse": 16
+        },
+        {
+          "chapter": 3,
+          "verse": 17
+        }
+      ]
+    }
+  ]
+}

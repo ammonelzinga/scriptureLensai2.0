@@ -1,0 +1,76 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [
+        28,
+        28,
+        28,
+        28,
+        28
+      ],
+      "verse_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "combined_text": "Unto thee will I cry, O LORD my rock; be not silent to me: lest, if thou be silent to me, I become like them that go down into the pit. Hear the voice of my supplications, when I cry unto thee, when I lift up my hands toward thy holy oracle. Draw me not away with the wicked, and with the workers of iniquity, which speak peace to their neighbours, but mischief is in their hearts. Give them according to their deeds, and according to the wickedness of their endeavours: give them after the work of their hands; render to them their desert. Because they regard not the works of the LORD, nor the operation of his hands, he shall destroy them, and not build them up.",
+      "verses": [
+        {
+          "chapter": 28,
+          "verse": 1
+        },
+        {
+          "chapter": 28,
+          "verse": 2
+        },
+        {
+          "chapter": 28,
+          "verse": 3
+        },
+        {
+          "chapter": 28,
+          "verse": 4
+        },
+        {
+          "chapter": 28,
+          "verse": 5
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        28,
+        28,
+        28,
+        28
+      ],
+      "verse_numbers": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "combined_text": "Blessed be the LORD, because he hath heard the voice of my supplications. The LORD is my strength and my shield; my heart trusted in him, and I am helped: therefore my heart greatly rejoiceth; and with my song will I praise him. The LORD is their strength, and he is the saving strength of his anointed. Save thy people, and bless thine inheritance: feed them also, and lift them up for ever.",
+      "verses": [
+        {
+          "chapter": 28,
+          "verse": 6
+        },
+        {
+          "chapter": 28,
+          "verse": 7
+        },
+        {
+          "chapter": 28,
+          "verse": 8
+        },
+        {
+          "chapter": 28,
+          "verse": 9
+        }
+      ]
+    }
+  ]
+}

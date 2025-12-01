@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     query?: string
     topK?: number
     mode?: 'verses' | 'chapters'
-    bookId?: number
+    bookId?: string
     minSimilarity?: number
   }
 
@@ -88,10 +88,41 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ results: verses, mode })
     }
 
+    // Enrich RPC rows (verse_id, book_id, chapter_seq, verse_seq, text, similarity)
+    const rows = results as Array<{ verse_id: string; book_id: string; chapter_seq: number; verse_seq: number; text: string; similarity: number }>
+    const bookIds = Array.from(new Set(rows.map(r => r.book_id)))
+    // Fetch chapters for these books to resolve chapter IDs
+    const { data: chAll } = await sb
+      .from('chapters')
+      .select('id, book_id, seq')
+      .in('book_id', bookIds)
+    const chapters = chAll || []
+    const chapterKey = (b: string, s: number) => `${b}:${s}`
+    const chapterMap = new Map<string, any>(chapters.map((c: any) => [chapterKey(c.book_id, c.seq), c]))
+    // Fetch books for titles
+    const { data: booksInfo } = await sb
+      .from('books')
+      .select('id, title')
+      .in('id', bookIds)
+    const booksMap = new Map<string, any>((booksInfo || []).map((b: any) => [b.id, b]))
 
-    if (bookId) results = results.filter((r: any) => r.book_id === bookId)
-    results = results.filter((r: any) => (r.similarity ?? 0) >= minSimilarity)
-    return NextResponse.json({ results, mode })
+    let enriched = rows.map(r => {
+      const ch = chapterMap.get(chapterKey(r.book_id, r.chapter_seq))
+      const bk = booksMap.get(r.book_id)
+      return {
+        id: r.verse_id,
+        text: r.text,
+        similarity: r.similarity,
+        book_id: r.book_id,
+        book_title: bk?.title || null,
+        chapter_id: ch?.id || null,
+        chapter_seq: r.chapter_seq,
+        seq: r.verse_seq,
+      }
+    })
+    if (bookId) enriched = enriched.filter(r => r.book_id === bookId)
+    enriched = enriched.filter(r => (r.similarity ?? 0) >= minSimilarity)
+    return NextResponse.json({ results: enriched, mode })
   }
 
   // Chapters mode

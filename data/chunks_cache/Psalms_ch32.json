@@ -1,0 +1,88 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      "verse_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "combined_text": "Blessed is he whose transgression is forgiven, whose sin is covered. Blessed is the man unto whom the LORD imputeth not iniquity, and in whose spirit there is no guile. When I kept silence, my bones waxed old through my roaring all the day long. For day and night thy hand was heavy upon me: my moisture is turned into the drought of summer. Selah. I acknowledge my sin unto thee, and mine iniquity have I not hid. I said, I will confess my transgressions unto the LORD; and thou forgavest the iniquity of my sin. Selah. For this shall every one that is godly pray unto thee in a time when thou mayest be found: surely in the floods of great waters they shall not come nigh unto him. Thou art my hiding place; thou shalt preserve me from trouble; thou shalt compass me about with songs of deliverance. Selah.",
+      "verses": [
+        {
+          "chapter": 32,
+          "verse": 1
+        },
+        {
+          "chapter": 32,
+          "verse": 2
+        },
+        {
+          "chapter": 32,
+          "verse": 3
+        },
+        {
+          "chapter": 32,
+          "verse": 4
+        },
+        {
+          "chapter": 32,
+          "verse": 5
+        },
+        {
+          "chapter": 32,
+          "verse": 6
+        },
+        {
+          "chapter": 32,
+          "verse": 7
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "verse_numbers": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "combined_text": "I will instruct thee and teach thee in the way which thou shalt go: I will guide thee with mine eye. Be ye not as the horse, or as the mule, which have no understanding: whose mouth must be held in with bit and bridle, lest they come near unto thee. Many sorrows shall be to the wicked: but he that trusteth in the LORD, mercy shall compass him about. Be glad in the LORD, and rejoice, ye righteous: and shout for joy, all ye that are upright in heart.",
+      "verses": [
+        {
+          "chapter": 32,
+          "verse": 8
+        },
+        {
+          "chapter": 32,
+          "verse": 9
+        },
+        {
+          "chapter": 32,
+          "verse": 10
+        },
+        {
+          "chapter": 32,
+          "verse": 11
+        }
+      ]
+    }
+  ]
+}

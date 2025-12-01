@@ -1,0 +1,76 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [
+        47,
+        47,
+        47,
+        47
+      ],
+      "verse_numbers": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "combined_text": "O clap your hands, all ye people; shout unto God with the voice of triumph. For the LORD most high is terrible; he is a great King over all the earth. He shall subdue the people under us, and the nations under our feet. He shall choose our inheritance for us, the excellency of Jacob whom he loved. Selah.",
+      "verses": [
+        {
+          "chapter": 47,
+          "verse": 1
+        },
+        {
+          "chapter": 47,
+          "verse": 2
+        },
+        {
+          "chapter": 47,
+          "verse": 3
+        },
+        {
+          "chapter": 47,
+          "verse": 4
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        47,
+        47,
+        47,
+        47,
+        47
+      ],
+      "verse_numbers": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "combined_text": "God is gone up with a shout, the LORD with the sound of a trumpet. Sing praises to God, sing praises: sing praises unto our King, sing praises. For God is the King of all the earth: sing ye praises with understanding. God reigneth over the heathen: God sitteth upon the throne of his holiness. The princes of the people are gathered together, even the people of the God of Abraham: for the shields of the earth belong unto God: he is greatly exalted.",
+      "verses": [
+        {
+          "chapter": 47,
+          "verse": 5
+        },
+        {
+          "chapter": 47,
+          "verse": 6
+        },
+        {
+          "chapter": 47,
+          "verse": 7
+        },
+        {
+          "chapter": 47,
+          "verse": 8
+        },
+        {
+          "chapter": 47,
+          "verse": 9
+        }
+      ]
+    }
+  ]
+}

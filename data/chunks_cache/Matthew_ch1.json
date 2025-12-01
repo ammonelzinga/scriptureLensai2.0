@@ -1,0 +1,181 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "verse_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "combined_text": "The book of the generation of Jesus Christ, the son of David, the son of Abraham. Abraham begat Isaac; and Isaac begat Jacob; and Jacob begat Judas and his brethren; And Judas begat Phares and Zara of Thamar; and Phares begat Esrom; and Esrom begat Aram; And Aram begat Aminadab; and Aminadab begat Naasson; and Naasson begat Salmon; And Salmon begat Booz of Rachab; and Booz begat Obed of Ruth; and Obed begat Jesse; And Jesse begat David the king; and David the king begat Solomon of her that had been the wife of Urias; And Solomon begat Roboam; and Roboam begat Abia; and Abia begat Asa; And Asa begat Josaphat; and Josaphat begat Joram; and Joram begat Ozias; And Ozias begat Joatham; and Joatham begat Achaz; and Achaz begat Ezekias; And Ezekias begat Manasses; and Manasses begat Amon; and Amon begat Josias;",
+      "verses": [
+        {
+          "chapter": 1,
+          "verse": 1
+        },
+        {
+          "chapter": 1,
+          "verse": 2
+        },
+        {
+          "chapter": 1,
+          "verse": 3
+        },
+        {
+          "chapter": 1,
+          "verse": 4
+        },
+        {
+          "chapter": 1,
+          "verse": 5
+        },
+        {
+          "chapter": 1,
+          "verse": 6
+        },
+        {
+          "chapter": 1,
+          "verse": 7
+        },
+        {
+          "chapter": 1,
+          "verse": 8
+        },
+        {
+          "chapter": 1,
+          "verse": 9
+        },
+        {
+          "chapter": 1,
+          "verse": 10
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "verse_numbers": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "combined_text": "And Josias begat Jechonias and his brethren, about the time they were carried away to Babylon: And after they were brought to Babylon, Jechonias begat Salathiel; and Salathiel begat Zorobabel; And Zorobabel begat Abiud; and Abiud begat Eliakim; and Eliakim begat Azor; And Azor begat Sadoc; and Sadoc begat Achim; and Achim begat Eliud; And Eliud begat Eleazar; and Eleazar begat Matthan; and Matthan begat Jacob; And Jacob begat Joseph the husband of Mary, of whom was born Jesus, who is called Christ. So all the generations from Abraham to David are fourteen generations; and from David until the carrying away into Babylon are fourteen generations; and from the carrying away into Babylon unto Christ are fourteen generations.",
+      "verses": [
+        {
+          "chapter": 1,
+          "verse": 11
+        },
+        {
+          "chapter": 1,
+          "verse": 12
+        },
+        {
+          "chapter": 1,
+          "verse": 13
+        },
+        {
+          "chapter": 1,
+          "verse": 14
+        },
+        {
+          "chapter": 1,
+          "verse": 15
+        },
+        {
+          "chapter": 1,
+          "verse": 16
+        },
+        {
+          "chapter": 1,
+          "verse": 17
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "verse_numbers": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "combined_text": "Now the birth of Jesus Christ was on this wise: When as his mother Mary was espoused to Joseph, before they came together, she was found with child of the Holy Ghost. Then Joseph her husband, being a just man, and not willing to make her a publick example, was minded to put her away privily. But while he thought on these things, behold, the angel of the LORD appeared unto him in a dream, saying, Joseph, thou son of David, fear not to take unto thee Mary thy wife: for that which is conceived in her is of the Holy Ghost. And she shall bring forth a son, and thou shalt call his name JESUS: for he shall save his people from their sins. Now all this was done, that it might be fulfilled which was spoken of the Lord by the prophet, saying, Behold, a virgin shall be with child, and shall bring forth a son, and they shall call his name Emmanuel, which being interpreted is, God with us. Then Joseph being raised from sleep did as the angel of the Lord had bidden him, and took unto him his wife: And knew her not till she had brought forth her firstborn son: and he called his name JESUS.",
+      "verses": [
+        {
+          "chapter": 1,
+          "verse": 18
+        },
+        {
+          "chapter": 1,
+          "verse": 19
+        },
+        {
+          "chapter": 1,
+          "verse": 20
+        },
+        {
+          "chapter": 1,
+          "verse": 21
+        },
+        {
+          "chapter": 1,
+          "verse": 22
+        },
+        {
+          "chapter": 1,
+          "verse": 23
+        },
+        {
+          "chapter": 1,
+          "verse": 24
+        },
+        {
+          "chapter": 1,
+          "verse": 25
+        }
+      ]
+    }
+  ]
+}

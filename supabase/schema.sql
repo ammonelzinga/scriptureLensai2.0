@@ -1,19 +1,26 @@
--- Enable pgvector
-create extension if not exists vector;
--- Enable pg_trgm for fast lexical search
-create extension if not exists pg_trgm;
+-- =============================================
+-- New Scripture Embedding Architecture Migration
+-- =============================================
+-- Extensions
+create extension if not exists vector;            -- pgvector for embeddings
+create extension if not exists pg_trgm;           -- trigram lexical similarity
+create extension if not exists pgcrypto;          -- for gen_random_uuid()
 
--- Entities
+-- =============================================
+-- Core Reference Entities (Provenance / Metadata)
+-- =============================================
 create table if not exists traditions (
   id uuid primary key default gen_random_uuid(),
-  name text not null unique
+  name text not null unique,
+  created_at timestamptz default now()
 );
 
 create table if not exists sources (
   id uuid primary key default gen_random_uuid(),
   tradition_id uuid not null references traditions(id) on delete cascade,
   name text not null,
-  unique(tradition_id, name)
+  unique(tradition_id, name),
+  created_at timestamptz default now()
 );
 
 create table if not exists works (
@@ -21,7 +28,8 @@ create table if not exists works (
   source_id uuid not null references sources(id) on delete cascade,
   name text not null,
   abbrev text,
-  unique(source_id, name)
+  unique(source_id, name),
+  created_at timestamptz default now()
 );
 
 create table if not exists books (
@@ -29,196 +37,194 @@ create table if not exists books (
   work_id uuid not null references works(id) on delete cascade,
   seq int not null,
   title text not null,
-  unique(work_id, seq)
+  unique(work_id, seq),
+  created_at timestamptz default now()
 );
 
--- Using 1536 dims for text-embedding-3-small by default
+-- =============================================
+-- Chapters (No embeddings anymore)
+-- =============================================
 create table if not exists chapters (
   id uuid primary key default gen_random_uuid(),
-  work_id uuid not null references works(id) on delete cascade,
-  book_id uuid references books(id) on delete cascade,
+  book_id uuid not null references books(id) on delete cascade,
   seq int not null,
   title text,
-  embedding vector(1536)
+  unique(book_id, seq),
+  created_at timestamptz default now()
 );
-create index if not exists chapters_embedding_idx on chapters using ivfflat (embedding vector_cosine_ops) with (lists = 100);
-
-create table if not exists verses (
-  id uuid primary key default gen_random_uuid(),
-  chapter_id uuid not null references chapters(id) on delete cascade,
-  seq int not null,
-  text text not null,
-  embedding vector(1536)
-);
-create index if not exists verses_chapter_seq_idx on verses(chapter_id, seq);
-create index if not exists verses_embedding_idx on verses using ivfflat (embedding vector_cosine_ops) with (lists = 100);
-
--- Trigram indexes for lexical search
-create index if not exists verses_text_trgm_idx on verses using gin (text gin_trgm_ops);
+create index if not exists chapters_book_seq_idx on chapters(book_id, seq);
 create index if not exists chapters_title_trgm_idx on chapters using gin (title gin_trgm_ops);
 
--- Lexical search RPCs using pg_trgm similarity
-create or replace function lexical_search_verses(q text, match_count int default 20)
-returns table (id uuid, chapter_id uuid, seq int, text text, book_id uuid, book_title text, chapter_number int, similarity float)
+-- =============================================
+-- Embedding Chunks (Group of verses, 3-10 verses)
+-- =============================================
+create table if not exists embedding_chunks (
+  id uuid primary key default gen_random_uuid(),
+  book_id uuid not null references books(id) on delete cascade,
+  start_chapter int not null,            -- first chapter touched (for filtering)
+  end_chapter int not null,              -- last chapter touched (inclusive)
+  verse_numbers int[] not null,          -- ordered verse numbers within their chapters (flattened sequentially)
+  chapter_numbers int[] not null,        -- parallel array of chapter numbers (same length as verse_numbers)
+  combined_text text not null,           -- concatenated verse text
+  embedding vector(512) not null,        -- 512-dim embedding (text-embedding-3-small)
+  verses_count int generated always as (cardinality(verse_numbers)) stored,
+  created_at timestamptz default now(),
+  constraint chk_chunk_min_max check (cardinality(verse_numbers) >= 3 and cardinality(verse_numbers) <= 10)
+);
+-- Vector index (use ivfflat; requires data loaded before efficient usage)
+create index if not exists embedding_chunks_embedding_idx on embedding_chunks using ivfflat (embedding vector_cosine_ops) with (lists = 100);
+create index if not exists embedding_chunks_book_idx on embedding_chunks(book_id);
+
+-- =============================================
+-- Verses (One row per verse, referencing chunk)
+-- =============================================
+create table if not exists verses (
+  id uuid primary key default gen_random_uuid(),
+  book_id uuid not null references books(id) on delete cascade,
+  chapter_seq int not null,              -- chapter number within book
+  verse_seq int not null,                -- verse number within chapter
+  text text not null,
+  chunk_id uuid not null references embedding_chunks(id) on delete restrict,
+  unique(book_id, chapter_seq, verse_seq),
+  created_at timestamptz default now()
+);
+create index if not exists verses_chunk_idx on verses(chunk_id);
+create index if not exists verses_book_chapter_idx on verses(book_id, chapter_seq);
+create index if not exists verses_text_trgm_idx on verses using gin (text gin_trgm_ops);
+
+-- =============================================
+-- Search / Similarity Helper Functions (Vector + Lexical)
+-- =============================================
+-- Return matching chunk IDs with similarity score (cosine)
+create or replace function match_embedding_chunks(query_embedding vector(512), match_count int default 10)
+returns table (chunk_id uuid, score float)
 language sql stable as $$
-  select v.id, v.chapter_id, v.seq, v.text, c.book_id, b.title as book_title, c.seq as chapter_number,
-         similarity(v.text, q) as similarity
+  select c.id as chunk_id,
+         1 - (c.embedding <=> query_embedding) as score
+  from embedding_chunks c
+  order by c.embedding <=> query_embedding
+  limit match_count
+$$;
+
+-- Expand chunks into verses ranked by chunk similarity; optionally include lexical similarity
+create or replace function semantic_search_verses(
+  query_embedding vector(512),
+  match_count int default 25,
+  include_lexical boolean default true,
+  lexical_text text default null
+)
+returns table (
+  verse_id uuid,
+  book_id uuid,
+  chapter_seq int,
+  verse_seq int,
+  text text,
+  chunk_id uuid,
+  chunk_score float,
+  lexical_score float,
+  combined_score float
+)
+language sql stable as $$
+  with chunk_matches as (
+    select id, 1 - (embedding <=> query_embedding) as score
+    from embedding_chunks
+    order by embedding <=> query_embedding
+    limit match_count * 2  -- fetch extra chunks then fan out verses
+  )
+  select v.id as verse_id,
+         v.book_id,
+         v.chapter_seq,
+         v.verse_seq,
+         v.text,
+         v.chunk_id,
+         cm.score as chunk_score,
+         case when include_lexical and lexical_text is not null then similarity(v.text, lexical_text) else 0 end as lexical_score,
+         cm.score + (case when include_lexical and lexical_text is not null then similarity(v.text, lexical_text) * 0.15 else 0 end) as combined_score
   from verses v
-  join chapters c on c.id = v.chapter_id
-  join books b on b.id = c.book_id
+  join chunk_matches cm on cm.id = v.chunk_id
+  order by combined_score desc
+  limit match_count
+$$;
+
+-- Given a verse id, search for similar verses via its chunk embedding (self-exclusion optional)
+create or replace function semantic_search_by_verse(
+  verse_uuid uuid,
+  match_count int default 20,
+  exclude_self boolean default true
+)
+returns table (
+  verse_id uuid,
+  book_id uuid,
+  chapter_seq int,
+  verse_seq int,
+  text text,
+  source_chunk uuid,
+  match_chunk uuid,
+  chunk_score float
+)
+language sql stable as $$
+  with src as (
+    select v.id as verse_id, c.embedding, v.chunk_id
+    from verses v
+    join embedding_chunks c on c.id = v.chunk_id
+    where v.id = verse_uuid
+  ), chunk_neighbors as (
+    select ec.id, 1 - (ec.embedding <=> s.embedding) as score
+    from embedding_chunks ec, src s
+    order by ec.embedding <=> s.embedding
+    limit match_count * 2
+  )
+  select v.id as verse_id,
+         v.book_id,
+         v.chapter_seq,
+         v.verse_seq,
+         v.text,
+         (select chunk_id from src) as source_chunk,
+         v.chunk_id as match_chunk,
+         cn.score as chunk_score
+  from verses v
+  join chunk_neighbors cn on cn.id = v.chunk_id
+  where not (exclude_self and v.id = verse_uuid)
+  order by chunk_score desc
+  limit match_count
+$$;
+
+-- Simple lexical verse search (trigram)
+create or replace function lexical_search_verses(q text, match_count int default 20)
+returns table (verse_id uuid, book_id uuid, chapter_seq int, verse_seq int, text text, similarity float)
+language sql stable as $$
+  select v.id, v.book_id, v.chapter_seq, v.verse_seq, v.text, similarity(v.text, q) as similarity
+  from verses v
   where v.text % q
   order by similarity(v.text, q) desc
   limit match_count
 $$;
 
-create or replace function lexical_search_chapters(q text, match_count int default 20)
-returns table (id uuid, book_id uuid, title text, chapter_number int, book_title text, similarity float)
-language sql stable as $$
-  select c.id, c.book_id, coalesce(c.title, 'Chapter '||c.seq) as title, c.seq as chapter_number, b.title as book_title,
-         similarity(c.title, q) as similarity
-  from chapters c
-  join books b on b.id = c.book_id
-  where c.title % q
-  order by similarity(c.title, q) desc
-  limit match_count
-$$;
+-- =============================================
+-- Row Level Security (Public read only)
+-- =============================================
+alter table traditions        enable row level security;
+alter table sources           enable row level security;
+alter table works             enable row level security;
+alter table books             enable row level security;
+alter table chapters          enable row level security;
+alter table embedding_chunks  enable row level security;
+alter table verses            enable row level security;
 
--- Similarity RPCs
-create or replace function match_chapters(query_embedding vector, match_count int default 10)
-returns table (id uuid, title text, seq int, work_id uuid, book_id uuid, similarity float)
-language sql stable as $$
-  select c.id, c.title, c.seq, c.work_id, c.book_id,
-         1 - (c.embedding <=> query_embedding) as similarity
-  from chapters c
-  where c.embedding is not null
-  order by c.embedding <=> query_embedding
-  limit match_count
-$$;
+-- Helper to create read policy if not present
+do $$ begin if not exists (select 1 from pg_policies where schemaname='public' and tablename='traditions' and policyname='read_traditions') then create policy read_traditions on traditions for select using (true); end if; end $$;
+do $$ begin if not exists (select 1 from pg_policies where schemaname='public' and tablename='sources' and policyname='read_sources') then create policy read_sources on sources for select using (true); end if; end $$;
+do $$ begin if not exists (select 1 from pg_policies where schemaname='public' and tablename='works' and policyname='read_works') then create policy read_works on works for select using (true); end if; end $$;
+do $$ begin if not exists (select 1 from pg_policies where schemaname='public' and tablename='books' and policyname='read_books') then create policy read_books on books for select using (true); end if; end $$;
+do $$ begin if not exists (select 1 from pg_policies where schemaname='public' and tablename='chapters' and policyname='read_chapters') then create policy read_chapters on chapters for select using (true); end if; end $$;
+do $$ begin if not exists (select 1 from pg_policies where schemaname='public' and tablename='embedding_chunks' and policyname='read_embedding_chunks') then create policy read_embedding_chunks on embedding_chunks for select using (true); end if; end $$;
+do $$ begin if not exists (select 1 from pg_policies where schemaname='public' and tablename='verses' and policyname='read_verses') then create policy read_verses on verses for select using (true); end if; end $$;
 
-create or replace function match_verses(query_embedding vector, match_count int default 15)
-returns table (id uuid, chapter_id uuid, seq int, text text, similarity float)
-language sql stable as $$
-  select v.id, v.chapter_id, v.seq, v.text,
-         1 - (v.embedding <=> query_embedding) as similarity
-  from verses v
-  where v.embedding is not null
-  order by v.embedding <=> query_embedding
-  limit match_count
-$$;
-
--- Embedding jobs queue
-create table if not exists embedding_jobs (
-  id uuid primary key default gen_random_uuid(),
-  entity_type text not null check (entity_type in ('verse','chapter')),
-  entity_id uuid not null,
-  status text not null default 'pending' check (status in ('pending','processing','done','error')),
-  error text,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
-alter table embedding_jobs enable row level security;
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename='embedding_jobs' AND policyname='read_embedding_jobs'
-  ) THEN
-    CREATE POLICY read_embedding_jobs ON embedding_jobs FOR SELECT USING (true);
-  END IF;
-END $$;
-
-create or replace function set_updated_at() returns trigger as $$
-begin
-  new.updated_at = now();
-  return new;
-end;$$ language plpgsql;
-
-drop trigger if exists trg_embedding_jobs_updated_at on embedding_jobs;
-create trigger trg_embedding_jobs_updated_at before update on embedding_jobs for each row execute function set_updated_at();
-
--- Trigger functions to enqueue embedding jobs when new verse/chapter inserted without embedding
-create or replace function enqueue_verse_embedding() returns trigger as $$
-begin
-  if new.embedding is null then
-    insert into embedding_jobs(entity_type, entity_id) values ('verse', new.id);
-  end if;
-  return new;
-end;$$ language plpgsql;
-
-create or replace function enqueue_chapter_embedding() returns trigger as $$
-begin
-  if new.embedding is null then
-    insert into embedding_jobs(entity_type, entity_id) values ('chapter', new.id);
-  end if;
-  return new;
-end;$$ language plpgsql;
-
-drop trigger if exists trg_enqueue_verse on verses;
-create trigger trg_enqueue_verse after insert on verses for each row execute function enqueue_verse_embedding();
-
-drop trigger if exists trg_enqueue_chapter on chapters;
-create trigger trg_enqueue_chapter after insert on chapters for each row execute function enqueue_chapter_embedding();
-
--- Combined similarity (chapters + verses)
-create or replace function match_chapter_and_verses(query_embedding vector, chapter_count int default 10, verse_count int default 15)
-returns table(entity_type text, id uuid, parent_chapter uuid, seq int, text text, similarity float)
-language sql stable as $$
-  (
-    select 'chapter' as entity_type, c.id, c.id as parent_chapter, c.seq, coalesce(c.title, 'Chapter '||c.seq) as text,
-           1 - (c.embedding <=> query_embedding) as similarity
-    from chapters c
-    where c.embedding is not null
-    order by c.embedding <=> query_embedding
-    limit chapter_count
-  )
-  union all
-  (
-    select 'verse' as entity_type, v.id, v.chapter_id as parent_chapter, v.seq, v.text,
-           1 - (v.embedding <=> query_embedding) as similarity
-    from verses v
-    where v.embedding is not null
-    order by v.embedding <=> query_embedding
-    limit verse_count
-  )
-$$;
-
-
--- RLS
-alter table traditions enable row level security;
-alter table sources enable row level security;
-alter table works enable row level security;
-alter table books enable row level security;
-alter table chapters enable row level security;
-alter table verses enable row level security;
-
--- Public read policies
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='traditions' AND policyname='read_traditions') THEN
-    CREATE POLICY read_traditions ON traditions FOR SELECT USING (true);
-  END IF;
-END $$;
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='sources' AND policyname='read_sources') THEN
-    CREATE POLICY read_sources ON sources FOR SELECT USING (true);
-  END IF;
-END $$;
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='works' AND policyname='read_works') THEN
-    CREATE POLICY read_works ON works FOR SELECT USING (true);
-  END IF;
-END $$;
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='books' AND policyname='read_books') THEN
-    CREATE POLICY read_books ON books FOR SELECT USING (true);
-  END IF;
-END $$;
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='chapters' AND policyname='read_chapters') THEN
-    CREATE POLICY read_chapters ON chapters FOR SELECT USING (true);
-  END IF;
-END $$;
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='verses' AND policyname='read_verses') THEN
-    CREATE POLICY read_verses ON verses FOR SELECT USING (true);
-  END IF;
-END $$;
-
--- No insert/update/delete policies for anon; service role bypasses RLS.
+-- =============================================
+-- Notes:
+-- * Embeddings only stored at chunk level (512 dims).
+-- * Verses link to chunk via chunk_id.
+-- * All previous chapter/verse embedding columns & queues removed.
+-- * Functions provided for semantic search by query embedding or verse id.
+-- * Use cosine distance ordering: ORDER BY embedding <-> query_vector (via <=> for distance then 1 - for similarity).
+-- =============================================

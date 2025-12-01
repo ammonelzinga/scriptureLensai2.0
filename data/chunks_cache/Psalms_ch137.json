@@ -1,0 +1,76 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [
+        137,
+        137,
+        137,
+        137,
+        137,
+        137
+      ],
+      "verse_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "combined_text": "By the rivers of Babylon, there we sat down, yea, we wept, when we remembered Zion. We hanged our harps upon the willows in the midst thereof. For there they that carried us away captive required of us a song; and they that wasted us required of us mirth, saying, Sing us one of the songs of Zion. How shall we sing the LORD's song in a strange land? If I forget thee, O Jerusalem, let my right hand forget her cunning. If I do not remember thee, let my tongue cleave to the roof of my mouth; if I prefer not Jerusalem above my chief joy.",
+      "verses": [
+        {
+          "chapter": 137,
+          "verse": 1
+        },
+        {
+          "chapter": 137,
+          "verse": 2
+        },
+        {
+          "chapter": 137,
+          "verse": 3
+        },
+        {
+          "chapter": 137,
+          "verse": 4
+        },
+        {
+          "chapter": 137,
+          "verse": 5
+        },
+        {
+          "chapter": 137,
+          "verse": 6
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        137,
+        137,
+        137
+      ],
+      "verse_numbers": [
+        7,
+        8,
+        9
+      ],
+      "combined_text": "Remember, O LORD, the children of Edom in the day of Jerusalem; who said, Rase it, rase it, even to the foundation thereof. O daughter of Babylon, who art to be destroyed; happy shall he be, that rewardeth thee as thou hast served us. Happy shall he be, that taketh and dasheth thy little ones against the stones.",
+      "verses": [
+        {
+          "chapter": 137,
+          "verse": 7
+        },
+        {
+          "chapter": 137,
+          "verse": 8
+        },
+        {
+          "chapter": 137,
+          "verse": 9
+        }
+      ]
+    }
+  ]
+}

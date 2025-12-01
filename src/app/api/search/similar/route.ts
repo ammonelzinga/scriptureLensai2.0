@@ -2,108 +2,53 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { chatSummary } from '@/lib/openai'
 
+// Similar verses given a verseId using chunk-level embeddings
 export async function POST(req: NextRequest) {
-  const { verseId, topK = 10, excludeSameChapter = true, bookId, testament, diversity = 0, workId, bookSeqMin, bookSeqMax } = await req.json()
+  const { verseId, topK = 10 } = await req.json()
   if (!verseId) return NextResponse.json({ error: 'Missing verseId' }, { status: 400 })
   const sb = supabaseAdmin()
 
-  const { data: verse } = await sb.from('verses').select('*').eq('id', verseId).single()
-  if (!verse?.embedding) return NextResponse.json({ error: 'Verse has no embedding' }, { status: 400 })
+  // Fetch target verse for summary context
+  const { data: target } = await sb.from('verses').select('id, text').eq('id', verseId).maybeSingle()
 
-  // find nearest chapters by cosine distance with fallback
-  let chapters: any[] = []
-  try {
-    const { data } = await sb.rpc('match_chapters', { query_embedding: verse.embedding, match_count: topK })
-    chapters = data || []
-  } catch (e) {
-    const { data } = await sb
-      .from('chapters')
-      .select('id, title, seq, work_id, book_id, embedding')
-      .not('embedding', 'is', null)
-      .limit(topK)
-    chapters = data || []
-  }
+  // Use RPC to find similar verses via the verse's chunk embedding
+  const { data, error } = await sb.rpc('semantic_search_by_verse', { verse_uuid: verseId, match_count: topK })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  const rows = (data || []) as Array<{ verse_id: string; book_id: string; chapter_seq: number; verse_seq: number; text: string; chunk_score: number }>
 
-  // Optional filters
-  if (excludeSameChapter) {
-    chapters = chapters.filter((c: any) => c.id !== verse.chapter_id)
+  // Group by chapter (book_id + chapter_seq)
+  const groups = new Map<string, Array<typeof rows[number]>>()
+  for (const r of rows) {
+    const k = `${r.book_id}:${r.chapter_seq}`
+    if (!groups.has(k)) groups.set(k, [])
+    groups.get(k)!.push(r)
   }
-  if (bookId) {
-    chapters = chapters.filter((c: any) => c.book_id === bookId)
-  }
-  // Dynamic filtering via books.seq and work_id
-  if (testament || workId || (typeof bookSeqMin === 'number') || (typeof bookSeqMax === 'number')) {
-    const sb2 = supabaseAdmin()
-    const bookIds = Array.from(new Set(chapters.map((c: any) => c.book_id).filter(Boolean))) as string[]
-    const { data: books } = await sb2.from('books').select('id, seq, work_id').in('id', bookIds)
-    const seqMap = new Map<string, number>((books || []).map(b => [b.id as unknown as string, b.seq as unknown as number]))
-    const workMap = new Map<string, string>((books || []).map(b => [b.id as unknown as string, b.work_id as unknown as string]))
-    chapters = chapters.filter((c: any) => {
-      const seq = seqMap.get(c.book_id)
-      const chWorkId = workMap.get(c.book_id)
-      if (workId && chWorkId !== workId) return false
-      if (typeof bookSeqMin === 'number' && typeof seq === 'number' && seq < bookSeqMin) return false
-      if (typeof bookSeqMax === 'number' && typeof seq === 'number' && seq > bookSeqMax) return false
-      if (testament === 'old') return typeof seq === 'number' && seq >= 1 && seq <= 39
-      if (testament === 'new') return typeof seq === 'number' && seq >= 40 && seq <= 66
-      return true
-    })
-  }
+  // Lookup chapter ids for linking
+  const bookIds = Array.from(new Set(rows.map(r => r.book_id)))
+  const { data: chapters } = await sb.from('chapters').select('id, book_id, seq, title').in('book_id', bookIds)
+  const chapterMap = new Map<string, any>((chapters || []).map((c: any) => [`${c.book_id}:${c.seq}`, c]))
 
-  // Diversity via simple MMR (Maximal Marginal Relevance) on chapter embeddings
-  if (diversity > 0) {
-    chapters = mmrSelect(chapters, verse.embedding, topK, diversity)
-  }
-
-  // For each chapter, suggest relevant verses by comparing to the verse embedding
-  const suggestions: any[] = []
-  for (const ch of chapters) {
-    const { data: verses } = await sb
-      .from('verses')
-      .select('id, seq, text, embedding')
-      .eq('chapter_id', ch.id)
-
-    const withScore = (verses || [])
-      .filter(v => v.embedding)
-      .map(v => ({ ...v, score: cosineSim(verse.embedding, v.embedding) }))
-      .sort((a,b)=>b.score-a.score)
+  // Build suggestions: top up to 3 verses per chapter group
+  const suggestions = Array.from(groups.entries()).map(([k, list]) => {
+    const ch = chapterMap.get(k)
+    const topVerses = list
+      .sort((a,b)=> (b.chunk_score ?? 0) - (a.chunk_score ?? 0))
       .slice(0, 3)
-    suggestions.push({ chapter: ch, verses: withScore })
-  }
-
-  // Summary via GPT
-  const summary = await chatSummary(
-    'You summarize relationships between two scripture passages briefly in 2-3 sentences.',
-    `Target verse: ${verse.text}\n\nTop related chapters and sample verses: ${suggestions.map(s=>`[${s.chapter.title}] ${s.verses.map((v:any)=>v.text).join(' | ')}`).join(' ; ')}`
-  )
-
-  const relevantVerseIds = suggestions.flatMap(s => s.verses.map((v:any)=>v.id))
-  return NextResponse.json({ suggestions, summary, relevantVerseIds })
-}
-
-function cosineSim(a: number[], b: number[]) {
-  let dot = 0, na = 0, nb = 0
-  for (let i=0;i<a.length && i<b.length;i++) { dot += a[i]*b[i]; na += a[i]*a[i]; nb += b[i]*b[i] }
-  return dot / (Math.sqrt(na) * Math.sqrt(nb) + 1e-8)
-}
-
-function mmrSelect(items: any[], queryEmb: number[], k: number, lambda: number) {
-  const selected: any[] = []
-  const remaining = [...items]
-  while (selected.length < Math.min(k, items.length) && remaining.length > 0) {
-    let bestIdx = 0
-    let bestScore = -Infinity
-    for (let i = 0; i < remaining.length; i++) {
-      const item = remaining[i]
-      const rel = cosineSim(queryEmb, item.embedding || [])
-      let div = 0
-      if (selected.length > 0) {
-        div = Math.max(...selected.map(s => cosineSim(s.embedding || [], item.embedding || [])))
-      }
-      const score = lambda * rel - (1 - lambda) * div
-      if (score > bestScore) { bestScore = score; bestIdx = i }
+      .map(v => ({ id: v.verse_id, seq: v.verse_seq, text: v.text }))
+    return {
+      chapter: ch ? { id: ch.id, title: ch.title, seq: ch.seq, book_id: ch.book_id } : { id: null, title: null, seq: Number(k.split(':')[1]), book_id: k.split(':')[0] },
+      verses: topVerses
     }
-    selected.push(remaining.splice(bestIdx, 1)[0])
-  }
-  return selected
+  })
+  // Flatten ids for highlighting
+  const relevantVerseIds = suggestions.flatMap(s => s.verses.map(v => v.id))
+
+  // Optional short summary
+  let summary: string | null = null
+  try {
+    const context = suggestions.map(s => `[${s.chapter.title || `Chapter ${s.chapter.seq}`}] ${s.verses.map(v=>v.text).join(' | ')}`).join(' ; ')
+    summary = await chatSummary('Briefly (1-2 sentences) describe how these passages relate to the target.', `Target: ${target?.text || ''}\n${context}`)
+  } catch {}
+
+  return NextResponse.json({ suggestions, summary, relevantVerseIds })
 }

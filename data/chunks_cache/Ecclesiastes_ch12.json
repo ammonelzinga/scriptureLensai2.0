@@ -1,0 +1,124 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [
+        12,
+        12,
+        12,
+        12,
+        12
+      ],
+      "verse_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "combined_text": "Remember now thy Creator in the days of thy youth, while the evil days come not, nor the years draw nigh, when thou shalt say, I have no pleasure in them; While the sun, or the light, or the moon, or the stars, be not darkened, nor the clouds return after the rain: In the day when the keepers of the house shall tremble, and the strong men shall bow themselves, and the grinders cease because they are few, and those that look out of the windows be darkened, And the doors shall be shut in the streets, when the sound of the grinding is low, and he shall rise up at the voice of the bird, and all the daughters of musick shall be brought low; Also when they shall be afraid of that which is high, and fears shall be in the way, and the almond tree shall flourish, and the grasshopper shall be a burden, and desire shall fail: because man goeth to his long home, and the mourners go about the streets:",
+      "verses": [
+        {
+          "chapter": 12,
+          "verse": 1
+        },
+        {
+          "chapter": 12,
+          "verse": 2
+        },
+        {
+          "chapter": 12,
+          "verse": 3
+        },
+        {
+          "chapter": 12,
+          "verse": 4
+        },
+        {
+          "chapter": 12,
+          "verse": 5
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        12,
+        12,
+        12
+      ],
+      "verse_numbers": [
+        6,
+        7,
+        8
+      ],
+      "combined_text": "Or ever the silver cord be loosed, or the golden bowl be broken, or the pitcher be broken at the fountain, or the wheel broken at the cistern. Then shall the dust return to the earth as it was: and the spirit shall return unto God who gave it. Vanity of vanities, saith the preacher; all is vanity.",
+      "verses": [
+        {
+          "chapter": 12,
+          "verse": 6
+        },
+        {
+          "chapter": 12,
+          "verse": 7
+        },
+        {
+          "chapter": 12,
+          "verse": 8
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        12,
+        12,
+        12
+      ],
+      "verse_numbers": [
+        9,
+        10,
+        11
+      ],
+      "combined_text": "And moreover, because the preacher was wise, he still taught the people knowledge; yea, he gave good heed, and sought out, and set in order many proverbs. The preacher sought to find out acceptable words: and that which was written was upright, even words of truth. The words of the wise are as goads, and as nails fastened by the masters of assemblies, which are given from one shepherd.",
+      "verses": [
+        {
+          "chapter": 12,
+          "verse": 9
+        },
+        {
+          "chapter": 12,
+          "verse": 10
+        },
+        {
+          "chapter": 12,
+          "verse": 11
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        12,
+        12,
+        12
+      ],
+      "verse_numbers": [
+        12,
+        13,
+        14
+      ],
+      "combined_text": "And further, by these, my son, be admonished: of making many books there is no end; and much study is a weariness of the flesh. Let us hear the conclusion of the whole matter: Fear God, and keep his commandments: for this is the whole duty of man. For God shall bring every work into judgment, with every secret thing, whether it be good, or whether it be evil.",
+      "verses": [
+        {
+          "chapter": 12,
+          "verse": 12
+        },
+        {
+          "chapter": 12,
+          "verse": 13
+        },
+        {
+          "chapter": 12,
+          "verse": 14
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "verse_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "combined_text": "Why do the heathen rage, and the people imagine a vain thing? The kings of the earth set themselves, and the rulers take counsel together, against the LORD, and against his anointed, saying, Let us break their bands asunder, and cast away their cords from us. He that sitteth in the heavens shall laugh: the LORD shall have them in derision. Then shall he speak unto them in his wrath, and vex them in his sore displeasure.",
+      "verses": [
+        {
+          "chapter": 2,
+          "verse": 1
+        },
+        {
+          "chapter": 2,
+          "verse": 2
+        },
+        {
+          "chapter": 2,
+          "verse": 3
+        },
+        {
+          "chapter": 2,
+          "verse": 4
+        },
+        {
+          "chapter": 2,
+          "verse": 5
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "verse_numbers": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "combined_text": "Yet have I set my king upon my holy hill of Zion. I will declare the decree: the LORD hath said unto me, Thou art my Son; this day have I begotten thee. Ask of me, and I shall give thee the heathen for thine inheritance, and the uttermost parts of the earth for thy possession. Thou shalt break them with a rod of iron; thou shalt dash them in pieces like a potter's vessel.",
+      "verses": [
+        {
+          "chapter": 2,
+          "verse": 6
+        },
+        {
+          "chapter": 2,
+          "verse": 7
+        },
+        {
+          "chapter": 2,
+          "verse": 8
+        },
+        {
+          "chapter": 2,
+          "verse": 9
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        2,
+        2,
+        2
+      ],
+      "verse_numbers": [
+        10,
+        11,
+        12
+      ],
+      "combined_text": "Be wise now therefore, O ye kings: be instructed, ye judges of the earth. Serve the LORD with fear, and rejoice with trembling. Kiss the Son, lest he be angry, and ye perish from the way, when his wrath is kindled but a little. Blessed are all they that put their trust in him.",
+      "verses": [
+        {
+          "chapter": 2,
+          "verse": 10
+        },
+        {
+          "chapter": 2,
+          "verse": 11
+        },
+        {
+          "chapter": 2,
+          "verse": 12
+        }
+      ]
+    }
+  ]
+}
