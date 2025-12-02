@@ -11,7 +11,11 @@ export async function POST(req: NextRequest) {
     topK?: number
     mode?: 'verses' | 'chapters'
     bookId?: string
+    workId?: string
+    bookSeqMin?: number
+    bookSeqMax?: number
     minSimilarity?: number
+    exactWord?: boolean
   }
 
   const queryRaw = body.query ?? ''
@@ -19,7 +23,11 @@ export async function POST(req: NextRequest) {
   const topK = body.topK ?? 20
   const mode = body.mode ?? 'verses'
   const bookId = body.bookId
+  const workId = body.workId
+  const bookSeqMin = body.bookSeqMin
+  const bookSeqMax = body.bookSeqMax
   const minSimilarity = Math.max(0, Math.min(1, body.minSimilarity ?? 0.1))
+  const exactWord = !!body.exactWord
 
   if (!query || query.length < 2) {
     return NextResponse.json({ error: 'Query string required' }, { status: 400 })
@@ -28,7 +36,51 @@ export async function POST(req: NextRequest) {
   const sb = supabaseAdmin()
 
   if (mode === 'verses') {
-    const { data, error } = await sb.rpc('lexical_search_verses', { q: query, match_count: topK })
+    // Exact single-word mode: use regex word boundaries via RPC and return immediately (no substring fallbacks)
+    const isSingleWord = !query.includes(' ')
+    if (exactWord && isSingleWord) {
+      const { data: exact } = await sb.rpc('lexical_search_word_exact', {
+        q: query,
+        match_count: topK,
+        p_book_id: bookId ?? null,
+        p_work_id: workId ?? null,
+        p_book_seq_min: bookSeqMin ?? null,
+        p_book_seq_max: bookSeqMax ?? null,
+      })
+      const rows = (exact || []) as Array<{ verse_id: string; book_id: string; chapter_seq: number; verse_seq: number; text: string }>
+      // Enrich and return (even if empty, honor exact-only semantics)
+      if (!rows.length) return NextResponse.json({ results: [], mode })
+      const bookIds = Array.from(new Set(rows.map((r) => r.book_id)))
+      const { data: chAll } = await sb.from('chapters').select('id, book_id, seq').in('book_id', bookIds)
+      const { data: booksInfo } = await sb.from('books').select('id, title').in('id', bookIds)
+      const chapterMap = new Map<string, any>((chAll || []).map((c: any) => [`${c.book_id}:${c.seq}`, c]))
+      const booksMap = new Map<string, any>((booksInfo || []).map((b: any) => [b.id, b]))
+      const mapped = rows.map((r) => {
+        const ch = chapterMap.get(`${r.book_id}:${r.chapter_seq}`)
+        const bk = booksMap.get(r.book_id)
+        return {
+          id: r.verse_id,
+          text: r.text,
+          similarity: 1, // exact match
+          book_id: r.book_id,
+          book_title: bk?.title || null,
+          chapter_id: ch?.id || null,
+          chapter_seq: r.chapter_seq,
+          seq: r.verse_seq,
+        }
+      })
+      return NextResponse.json({ results: mapped.slice(0, topK), mode })
+    }
+
+    // Default trigram-based search
+    const { data, error } = await sb.rpc('lexical_search_verses', {
+      q: query,
+      match_count: topK,
+      p_book_id: bookId ?? null,
+      p_work_id: workId ?? null,
+      p_book_seq_min: bookSeqMin ?? null,
+      p_book_seq_max: bookSeqMax ?? null,
+    })
     let results = data || []
 
     if (error || results.length === 0) {
@@ -176,6 +228,7 @@ export async function POST(req: NextRequest) {
         seq: r.verse_seq,
       }
     })
+    // Note: filtering now happens inside RPC; the below filter is redundant but harmless
     if (bookId) enriched = enriched.filter((r) => r.book_id === bookId)
     // If nothing passes the threshold, return the topK without filtering to avoid empty results
     const filtered = enriched.filter((r) => (r.similarity ?? 0) >= minSimilarity)

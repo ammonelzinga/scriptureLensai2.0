@@ -68,12 +68,16 @@ create table if not exists embedding_chunks (
   combined_text text not null,           -- concatenated verse text
   embedding vector(512) not null,        -- 512-dim embedding (text-embedding-3-small)
   verses_count int generated always as (cardinality(verse_numbers)) stored,
+  combined_hash text,                    -- deterministic hash of (book_id + chapter_numbers + verse_numbers) for idempotent upserts
   created_at timestamptz default now(),
   constraint chk_chunk_min_max check (cardinality(verse_numbers) >= 3 and cardinality(verse_numbers) <= 10)
 );
 -- Vector index (use ivfflat; requires data loaded before efficient usage)
 create index if not exists embedding_chunks_embedding_idx on embedding_chunks using ivfflat (embedding vector_cosine_ops) with (lists = 100);
 create index if not exists embedding_chunks_book_idx on embedding_chunks(book_id);
+-- Unique natural key index for idempotency (skip re-embedding identical chunk)
+alter table embedding_chunks add column if not exists combined_hash text;
+create unique index if not exists embedding_chunks_combined_hash_uidx on embedding_chunks(combined_hash);
 
 -- =============================================
 -- Verses (One row per verse, referencing chunk)
@@ -96,18 +100,29 @@ create index if not exists verses_text_trgm_idx on verses using gin (text gin_tr
 -- Search / Similarity Helper Functions (Vector + Lexical)
 -- =============================================
 -- Return matching chunk IDs with similarity score (cosine)
-create or replace function match_embedding_chunks(query_embedding vector(512), match_count int default 10)
+create or replace function match_embedding_chunks(
+  query_embedding vector(512),
+  match_count int default 10,
+  p_book_id uuid default null,
+  p_work_id uuid default null,
+  p_book_seq_min int default null,
+  p_book_seq_max int default null
+)
 returns table (chunk_id uuid, score double precision)
 language plpgsql stable as $$
 begin
   -- Improve recall for IVFFLAT by increasing probes (approximate → closer to exact)
-  -- Ensures parent chunk is far less likely to be missed
   perform set_config('ivfflat.probes', greatest(10, match_count)::text, true);
 
   return query
   select c.id as chunk_id,
          1 - (c.embedding <=> query_embedding) as score
   from embedding_chunks c
+  join books b on b.id = c.book_id
+  where (p_book_id is null or c.book_id = p_book_id)
+    and (p_work_id is null or b.work_id = p_work_id)
+    and (p_book_seq_min is null or b.seq >= p_book_seq_min)
+    and (p_book_seq_max is null or b.seq <= p_book_seq_max)
   order by c.embedding <=> query_embedding
   limit match_count;
 end;
@@ -118,7 +133,11 @@ create or replace function semantic_search_verses(
   query_embedding vector(512),
   match_count int default 25,
   include_lexical boolean default true,
-  lexical_text text default null
+  lexical_text text default null,
+  p_book_id uuid default null,
+  p_work_id uuid default null,
+  p_book_seq_min int default null,
+  p_book_seq_max int default null
 )
 returns table (
   verse_id uuid,
@@ -138,9 +157,14 @@ begin
 
   return query
   with chunk_matches as (
-    select id, 1 - (embedding <=> query_embedding) as score
-    from embedding_chunks
-    order by embedding <=> query_embedding
+    select c.id, 1 - (c.embedding <=> query_embedding) as score
+    from embedding_chunks c
+    join books b on b.id = c.book_id
+    where (p_book_id is null or c.book_id = p_book_id)
+      and (p_work_id is null or b.work_id = p_work_id)
+      and (p_book_seq_min is null or b.seq >= p_book_seq_min)
+      and (p_book_seq_max is null or b.seq <= p_book_seq_max)
+    order by c.embedding <=> query_embedding
     limit match_count * 2  -- fetch extra chunks then fan out verses
   )
   select v.id as verse_id,
@@ -163,7 +187,11 @@ $$;
 create or replace function semantic_search_by_verse(
   verse_uuid uuid,
   match_count int default 20,
-  exclude_self boolean default true
+  exclude_self boolean default true,
+  p_book_id uuid default null,
+  p_work_id uuid default null,
+  p_book_seq_min int default null,
+  p_book_seq_max int default null
 )
 returns table (
   verse_id uuid,
@@ -189,6 +217,11 @@ begin
   ), chunk_neighbors as (
     select ec.id, 1 - (ec.embedding <=> s.embedding) as score
     from embedding_chunks ec, src s
+    join books b on b.id = ec.book_id
+    where (p_book_id is null or ec.book_id = p_book_id)
+      and (p_work_id is null or b.work_id = p_work_id)
+      and (p_book_seq_min is null or b.seq >= p_book_seq_min)
+      and (p_book_seq_max is null or b.seq <= p_book_seq_max)
     order by ec.embedding <=> s.embedding
     limit match_count * 2
   )
@@ -209,13 +242,48 @@ end;
 $$;
 
 -- Simple lexical verse search (trigram)
-create or replace function lexical_search_verses(q text, match_count int default 20)
+create or replace function lexical_search_verses(
+  q text,
+  match_count int default 20,
+  p_book_id uuid default null,
+  p_work_id uuid default null,
+  p_book_seq_min int default null,
+  p_book_seq_max int default null
+)
 returns table (verse_id uuid, book_id uuid, chapter_seq int, verse_seq int, text text, similarity float)
 language sql stable as $$
   select v.id, v.book_id, v.chapter_seq, v.verse_seq, v.text, similarity(v.text, q) as similarity
   from verses v
+  join books b on b.id = v.book_id
   where v.text % q
+    and (p_book_id is null or v.book_id = p_book_id)
+    and (p_work_id is null or b.work_id = p_work_id)
+    and (p_book_seq_min is null or b.seq >= p_book_seq_min)
+    and (p_book_seq_max is null or b.seq <= p_book_seq_max)
   order by similarity(v.text, q) desc
+  limit match_count
+$$;
+
+-- Exact single-word verse search using regex word boundaries (case-insensitive)
+create or replace function lexical_search_word_exact(
+  q text,
+  match_count int default 20,
+  p_book_id uuid default null,
+  p_work_id uuid default null,
+  p_book_seq_min int default null,
+  p_book_seq_max int default null
+)
+returns table (verse_id uuid, book_id uuid, chapter_seq int, verse_seq int, text text)
+language sql stable as $$
+  select v.id, v.book_id, v.chapter_seq, v.verse_seq, v.text
+  from verses v
+  join books b on b.id = v.book_id
+  where v.text ~* ('\\m' || q || '\\M')
+    and (p_book_id is null or v.book_id = p_book_id)
+    and (p_work_id is null or b.work_id = p_work_id)
+    and (p_book_seq_min is null or b.seq >= p_book_seq_min)
+    and (p_book_seq_max is null or b.seq <= p_book_seq_max)
+  order by v.book_id, v.chapter_seq, v.verse_seq
   limit match_count
 $$;
 

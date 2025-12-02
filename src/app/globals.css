@@ -14,6 +14,10 @@ body {
   @apply bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100;
 }
 
+/* Hide scrollbars but preserve scroll */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* Smooth collapse/expand animations */
 .collapse-enter {
   max-height: 0;

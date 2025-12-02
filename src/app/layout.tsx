@@ -21,7 +21,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </Link>
               <nav className="flex gap-4 text-sm">
                 <Link href="/read" className="hover:text-primary">Read</Link>
-                <Link href="/ai" className="hover:text-primary">AI Tools</Link>
+                {/* AI Tools temporarily hidden */}
+                {/* <Link href="/ai" className="hover:text-primary">AI Tools</Link> */}
                 <Link href="/upload" className="hover:text-primary">Upload</Link>
                 <ThemeToggle />
               </nav>

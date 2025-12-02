@@ -10,7 +10,20 @@ export async function fetchNavigationTree(): Promise<TreeNode[]> {
   const { data: sources } = await sb.from('sources').select('*')
   const { data: works } = await sb.from('works').select('*')
   const { data: books } = await sb.from('books').select('*')
-  const { data: chapters } = await sb.from('chapters').select('*')
+  // Page through chapters to avoid server-side row limits (~1000 default)
+  const chapters: any[] = []
+  const pageSize = 1000
+  for (let from = 0; ; from += pageSize) {
+    const { data } = await sb
+      .from('chapters')
+      .select('*')
+      .order('book_id')
+      .order('seq', { ascending: true })
+      .range(from, from + pageSize - 1)
+    if (!data || data.length === 0) break
+    chapters.push(...data)
+    if (data.length < pageSize) break
+  }
 
   const sourceByTrad = new Map<string, any[]>(traditions.map(t => [t.id, []]))
   sources?.forEach(s => sourceByTrad.get(s.tradition_id)?.push(s))
@@ -22,7 +35,7 @@ export async function fetchNavigationTree(): Promise<TreeNode[]> {
   books?.forEach(b => booksByWork.get(b.work_id)?.push(b))
 
   const chaptersByWork = new Map<string, any[]>(works?.map(w => [w.id, []]) || [])
-  chapters?.forEach(c => chaptersByWork.get(c.work_id)?.push(c))
+  // Note: chapters table has no work_id; fallback below handles works without books.
 
   const chaptersByBook = new Map<string, any[]>(books?.map(b => [b.id, []]) || [])
   chapters?.forEach(c => c.book_id && chaptersByBook.get(c.book_id)?.push(c))

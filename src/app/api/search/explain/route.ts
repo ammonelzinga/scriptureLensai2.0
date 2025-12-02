@@ -9,7 +9,7 @@ import { embedText } from '@/lib/openai'
  */
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}))
-  const { query, topKChapters = 5, topKVerses = 10, hybrid = true } = body
+  const { query, topKChapters = 5, topKVerses = 10, hybrid = true, bookId, workId, bookSeqMin, bookSeqMax, testament } = body
   if (!query) return NextResponse.json({ error: 'Query required' }, { status: 400 })
 
   const sb = supabaseAdmin()
@@ -21,7 +21,11 @@ export async function POST(req: NextRequest) {
     query_embedding: emb,
     match_count: Math.max(50, topKVerses * 2),
     include_lexical: hybrid,
-    lexical_text: hybrid ? query : null
+    lexical_text: hybrid ? query : null,
+    p_book_id: bookId ?? null,
+    p_work_id: workId ?? null,
+    p_book_seq_min: (testament === 'new' ? 40 : (testament === 'old' ? 1 : (typeof bookSeqMin === 'number' ? bookSeqMin : null))),
+    p_book_seq_max: (testament === 'old' ? 39 : (testament === 'new' ? 66 : (typeof bookSeqMax === 'number' ? bookSeqMax : null))),
   })
   type SemRow = { verse_id: string; book_id: string; chapter_seq: number; verse_seq: number; text: string; chunk_score: number; lexical_score: number; combined_score: number }
   const sem = (semRows || []) as SemRow[]
@@ -53,7 +57,14 @@ export async function POST(req: NextRequest) {
   }).sort((a,b)=> (b.semantic + b.lexical*0.15) - (a.semantic + a.lexical*0.15)).slice(0, topKChapters)
 
   // Lexical-only verses for comparison
-  const { data: lexRows } = await sb.rpc('lexical_search_verses', { q: query, match_count: topKVerses })
+  const { data: lexRows } = await sb.rpc('lexical_search_verses', {
+    q: query,
+    match_count: topKVerses,
+    p_book_id: bookId ?? null,
+    p_work_id: workId ?? null,
+    p_book_seq_min: (testament === 'new' ? 40 : (testament === 'old' ? 1 : (typeof bookSeqMin === 'number' ? bookSeqMin : null))),
+    p_book_seq_max: (testament === 'old' ? 39 : (testament === 'new' ? 66 : (typeof bookSeqMax === 'number' ? bookSeqMax : null))),
+  })
   const lexVerses = (lexRows || []).map((v:any)=> ({ id: v.verse_id || v.id, text: v.text, semantic: 0, lexical: v.similarity ?? 0 }))
 
   return NextResponse.json({

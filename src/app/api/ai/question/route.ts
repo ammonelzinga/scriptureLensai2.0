@@ -56,6 +56,10 @@ export async function POST(req: NextRequest) {
       match_count: approxNeeded,
       include_lexical: hybrid,
       lexical_text: hybrid ? question : null,
+      p_book_id: bookId ?? null,
+      p_work_id: null,
+      p_book_seq_min: (testament === 'new' ? 40 : (testament === 'old' ? 1 : (typeof bookSeqMin === 'number' ? bookSeqMin : null))),
+      p_book_seq_max: (testament === 'old' ? 39 : (testament === 'new' ? 66 : (typeof bookSeqMax === 'number' ? bookSeqMax : null))),
     })
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     const more = (data || []) as Row[]
@@ -233,7 +237,14 @@ export async function POST(req: NextRequest) {
   // Backfill: if fewer unique chunks than requested, pull more nearest chunks directly
   if (typeof topK === 'number' && topK > 0 && cards.length < topK) {
     const deficit = topK - cards.length
-    const { data: neighborChunks } = await sb.rpc('match_embedding_chunks', { query_embedding: qVec, match_count: Math.max(topK * 2, deficit * 5) })
+    const { data: neighborChunks } = await sb.rpc('match_embedding_chunks', {
+      query_embedding: qVec,
+      match_count: Math.max(topK * 2, deficit * 5),
+      p_book_id: bookId ?? null,
+      p_work_id: null,
+      p_book_seq_min: (testament === 'new' ? 40 : (testament === 'old' ? 1 : (typeof bookSeqMin === 'number' ? bookSeqMin : null))),
+      p_book_seq_max: (testament === 'old' ? 39 : (testament === 'new' ? 66 : (typeof bookSeqMax === 'number' ? bookSeqMax : null))),
+    })
     const existingIds = new Set(cards.map(c => c.chunk.id))
     const toAdd = (neighborChunks || [])
       .map((n: any) => ({ id: n.chunk_id as string, score: n.score as number }))

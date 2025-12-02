@@ -36,11 +36,18 @@ export async function POST(req: NextRequest) {
   const sb = supabaseAdmin()
   const embedding = await embedText(question)
   const lexical = expandLexical(question, focus)
+  // derive testament bounds if provided
+  const tMin = testament === 'new' ? 40 : (testament === 'old' ? 1 : (typeof bookSeqMin === 'number' ? bookSeqMin : null))
+  const tMax = testament === 'old' ? 39 : (testament === 'new' ? 66 : (typeof bookSeqMax === 'number' ? bookSeqMax : null))
   const { data, error } = await sb.rpc('semantic_search_verses', {
     query_embedding: embedding,
     match_count: Math.max(120, topK * 10),
     include_lexical: hybrid,
-    lexical_text: hybrid ? lexical : null
+    lexical_text: hybrid ? lexical : null,
+    p_book_id: bookId ?? null,
+    p_work_id: null,
+    p_book_seq_min: tMin,
+    p_book_seq_max: tMax,
   })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
@@ -110,7 +117,14 @@ export async function POST(req: NextRequest) {
   for (const card of ot.slice(0, Math.min(8, ot.length))) {
     try {
       const qEmb = await embedText(card.combined_text.slice(0, 4000))
-      const { data: neigh } = await sb.rpc('match_embedding_chunks', { query_embedding: qEmb, match_count: 60 })
+      const { data: neigh } = await sb.rpc('match_embedding_chunks', {
+        query_embedding: qEmb,
+        match_count: 60,
+        p_book_id: bookId ?? null,
+        p_work_id: null,
+        p_book_seq_min: tMin,
+        p_book_seq_max: tMax,
+      })
       const ids = (neigh || []).map((n:any)=> n.chunk_id)
       if (!ids?.length) continue
       const { data: metas } = await sb

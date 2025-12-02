@@ -1,5 +1,6 @@
 "use client"
 import { useEffect, useState } from 'react'
+import { useAppendToReaderFlexible } from '@/lib/readerNav'
 
 export default function AIPage() {
   return (
@@ -20,10 +21,12 @@ export default function AIPage() {
 }
 
 function LexicalSearchCard() {
+  const appendToReader = useAppendToReaderFlexible()
   const [query, setQuery] = useState('')
   const [mode, setMode] = useState<'verses' | 'chapters'>('verses')
   const [topK, setTopK] = useState(20)
   const [minSimilarity, setMinSimilarity] = useState(0.2)
+  const [exactWord, setExactWord] = useState<boolean>(false)
   const [workId, setWorkId] = useState('')
   const [bookId, setBookId] = useState('')
   const [rangeStart, setRangeStart] = useState('')
@@ -61,7 +64,7 @@ function LexicalSearchCard() {
     if (!query.trim()) return
     setBusy(true)
     try {
-      const payload:any = { query, topK, mode, minSimilarity }
+      const payload:any = { query, topK, mode, minSimilarity, exactWord }
       if (workId) payload.workId = workId
       if (bookId) payload.bookId = bookId
       if (rangeStart) { const s=books.find(b=>b.id===rangeStart); if (s) payload.bookSeqMin = s.seq }
@@ -133,7 +136,11 @@ function LexicalSearchCard() {
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-xs text-zinc-600 dark:text-zinc-400">Min Similarity ({minSimilarity.toFixed(2)})</span>
-          <input type="range" min={0} max={0.9} step={0.05} value={minSimilarity} onChange={e=>setMinSimilarity(Number(e.target.value))} />
+          <input type="range" min={0} max={1} step={0.05} value={minSimilarity} onChange={e=>setMinSimilarity(Number(e.target.value))} />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-zinc-600 dark:text-zinc-400">Exact word match</label>
+          <input type="checkbox" checked={exactWord} onChange={e=>setExactWord(e.target.checked)} />
         </div>
         <div className="flex items-end">
           <button onClick={run} disabled={!query.trim()||busy||!!rangeError} className="w-full rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50">{busy?'Searching…':'Search'}</button>
@@ -153,10 +160,10 @@ function LexicalSearchCard() {
                   </div>
                   <div className="flex items-center gap-2 text-[10px]">
                     {mode === 'verses' && (
-                      <a href={`/read?chapterId=${encodeURIComponent(r.chapter_id)}&highlight=${encodeURIComponent(r.id)}`} className="underline">Open</a>
+                      <button type="button" className="underline" onClick={() => appendToReader({ chapterId: String(r.chapter_id) }, [String(r.id)])}>Open</button>
                     )}
                     {mode === 'chapters' && (
-                      <a href={`/read?chapterId=${encodeURIComponent(r.id)}`} className="underline">Open</a>
+                      <button type="button" className="underline" onClick={() => appendToReader({ chapterId: String(r.id) })}>Open</button>
                     )}
                     <button type="button" onClick={()=>navigator.clipboard?.writeText(String(r.id))} className="underline">Copy ID</button>
                   </div>
@@ -583,8 +590,7 @@ function AskQuestionCard() {
   const [rangeEnd, setRangeEnd] = useState<string>('')
   const [rangeError, setRangeError] = useState<string>('')
   const [showMore, setShowMore] = useState<boolean>(false)
-  const [hybrid, setHybrid] = useState<boolean>(true)
-  const [showExpanded, setShowExpanded] = useState<boolean>(false)
+  const [hybrid, setHybrid] = useState<boolean>(false)
   const [pinVerseId, setPinVerseId] = useState<string>('')
   const [lexicalWeight, setLexicalWeight] = useState<number>(0.15)
 
@@ -594,12 +600,9 @@ function AskQuestionCard() {
     if (typeof window === 'undefined') return
     const savedHybrid = localStorage.getItem('sl_hybrid')
     if (savedHybrid) setHybrid(savedHybrid === '1')
-    const savedExpanded = localStorage.getItem('sl_showExpanded')
-    if (savedExpanded) setShowExpanded(savedExpanded === '1')
   }, [])
   // Persist changes
   useEffect(() => { if(typeof window!=='undefined') localStorage.setItem('sl_hybrid', hybrid?'1':'0') }, [hybrid])
-  useEffect(() => { if(typeof window!=='undefined') localStorage.setItem('sl_showExpanded', showExpanded?'1':'0') }, [showExpanded])
   // Hydrate initial state from URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -706,9 +709,7 @@ function AskQuestionCard() {
             <label className="flex items-center gap-1">
               <input type="checkbox" checked={hybrid} onChange={e=>setHybrid(e.target.checked)} /> Hybrid scoring
             </label>
-            <label className="flex items-center gap-1">
-              <input type="checkbox" checked={showExpanded} onChange={e=>setShowExpanded(e.target.checked)} /> Show expanded query
-            </label>
+            
             <div className="flex items-center gap-2">
               <span>Lexical weight</span>
               <input type="range" min={0} max={0.5} step={0.01} value={lexicalWeight} onChange={e=>setLexicalWeight(Number(e.target.value))} disabled={!hybrid} />
@@ -793,9 +794,7 @@ function AskQuestionCard() {
           })()}
         </div>
       )}
-      {showExpanded && data?.expanded && (
-        <div className="mt-3 text-xs text-zinc-500">Expanded: {data.expanded}</div>
-      )}
+      
       {data?.overview && (
         <p className="mt-3 text-sm italic">{data.overview}</p>
       )}
@@ -807,6 +806,7 @@ function AskQuestionCard() {
 }
 
 function ChunkCards({ books, chunks, devtools, pinVerseId }:{ books:any[]; chunks:any[]; devtools:boolean; pinVerseId:string }){
+  const appendToReader = useAppendToReaderFlexible()
   const [open, setOpen] = useState<Record<string, boolean>>({})
   const toggle = (id:string) => setOpen(s => ({...s, [id]: !s[id]}))
   return (
@@ -818,8 +818,8 @@ function ChunkCards({ books, chunks, devtools, pinVerseId }:{ books:any[]; chunk
         const chRange = c.chunk.start_chapter === c.chunk.end_chapter || !c.chunk.end_chapter
           ? `Chapter ${c.chunk.start_chapter}`
           : `Chapters ${c.chunk.start_chapter}–${c.chunk.end_chapter}`
-        const highlight = c.verses.map((v:any)=>v.id).join(',')
-        const openLink = `/read?bookId=${encodeURIComponent(c.chunk.book_id)}&chapter=${encodeURIComponent(c.verses[0]?.chapter_seq||c.chunk.start_chapter||1)}&highlight=${encodeURIComponent(highlight)}`
+        const highlightIds = c.verses.map((v:any)=>String(v.id)).filter(Boolean)
+        const chapterSeq = c.verses[0]?.chapter_seq || c.chunk.start_chapter || 1
         return (
           <li key={id || i} className="rounded-md border border-zinc-200 dark:border-zinc-800">
             <div className="p-2 flex items-center justify-between">
@@ -830,7 +830,7 @@ function ChunkCards({ books, chunks, devtools, pinVerseId }:{ books:any[]; chunk
                 )}
               </div>
               <div className="flex items-center gap-2 text-[10px]">
-                <a href={openLink} className="underline">Open</a>
+                <button type="button" className="underline" onClick={() => appendToReader({ bookId: String(c.chunk.book_id), chapterSeq: Number(chapterSeq) }, highlightIds)}>Open</button>
                 <button type="button" onClick={()=>navigator.clipboard?.writeText(String(c.combined_text || ''))} className="underline">Copy text</button>
                 <button type="button" onClick={()=>navigator.clipboard?.writeText(String(id))} className="underline">Copy ID</button>
                 <button type="button" onClick={()=>toggle(id)} className="underline">{open[id]?'Hide':'Show'} text</button>

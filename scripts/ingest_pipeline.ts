@@ -507,38 +507,71 @@ async function insertChunk(bookId: string, c: ChunkOutput, force: boolean, embed
   // Determine chapter bounds
   const startChapter = Math.min(...c.chapter_numbers)
   const endChapter = Math.max(...c.chapter_numbers)
-  // Natural key hash
-  const hash = deterministicChunkHash(bookId, c)
-  // Check existing by matching all verse_numbers + chapter_numbers (simplified: exact combined_text hash)
-  const combinedHash = crypto.createHash('sha256').update(c.combined_text).digest('hex')
+  const combined_hash = crypto.createHash('sha256').update(`${bookId}|${c.chapter_numbers.join(',')}|${c.verse_numbers.join(',')}`).digest('hex')
   if (!force) {
-    const { data: maybe } = await supabaseRetry(async () => await sb.from('embedding_chunks').select('id').eq('book_id', bookId).eq('start_chapter', startChapter).eq('end_chapter', endChapter).limit(50), 'select embedding_chunks') as any
-    if (maybe && maybe.length) {
-      // naive skip if same count
-      return maybe[0].id as string
-    }
+    const { data: existing } = await supabaseRetry(
+      async () =>
+        await sb
+          .from('embedding_chunks')
+          .select('id')
+          .eq('combined_hash', combined_hash)
+          .limit(1),
+      'select embedding_chunk by hash'
+    ) as any
+    if (existing && existing[0]?.id) return existing[0].id as string
   }
+
   // Embed (use provided vector if available)
   const embedding = embeddingVec ?? (await embedMany([c.combined_text]))[0]
-  const { data } = await supabaseRetry(async () => await sb.from('embedding_chunks').insert({
-    book_id: bookId,
-    start_chapter: startChapter,
-    end_chapter: endChapter,
-    verse_numbers: c.verse_numbers,
-    chapter_numbers: c.chapter_numbers,
-    combined_text: c.combined_text,
-    embedding
-  }).select('id').single(), 'insert embedding_chunk') as any
-  return data.id as string
+
+  // Insert; if unique violation on combined_hash occurs, re-select existing
+  try {
+    const { data } = await supabaseRetry(
+      async () =>
+        await sb
+          .from('embedding_chunks')
+          .insert({
+            book_id: bookId,
+            start_chapter: startChapter,
+            end_chapter: endChapter,
+            verse_numbers: c.verse_numbers,
+            chapter_numbers: c.chapter_numbers,
+            combined_text: c.combined_text,
+            embedding,
+            combined_hash
+          })
+          .select('id')
+          .single(),
+      'insert embedding_chunk'
+    ) as any
+    return data.id as string
+  } catch (e: any) {
+    const { data: existing } = await supabaseRetry(
+      async () =>
+        await sb
+          .from('embedding_chunks')
+          .select('id')
+          .eq('combined_hash', combined_hash)
+          .limit(1),
+      'select embedding_chunk after duplicate'
+    ) as any
+    if (existing && existing[0]?.id) return existing[0].id as string
+    throw e
+  }
 }
 
 async function upsertVerse(bookId: string, chapterSeq: number, verseSeq: number, text: string, chunkId: string) {
-  const { data: existing } = await supabaseRetry(async () => await sb.from('verses').select('id').eq('book_id', bookId).eq('chapter_seq', chapterSeq).eq('verse_seq', verseSeq).limit(1), 'select verse') as any
-  if (!existing?.[0]) {
-    await supabaseRetry(async () => await sb.from('verses').insert({ book_id: bookId, chapter_seq: chapterSeq, verse_seq: verseSeq, text, chunk_id: chunkId }), 'insert verse')
-  } else {
-    await supabaseRetry(async () => await sb.from('verses').update({ text, chunk_id: chunkId }).eq('id', existing[0].id), 'update verse')
-  }
+  // Use atomic UPSERT to avoid duplicate-key errors during retries.
+  await supabaseRetry(
+    async () =>
+      await sb
+        .from('verses')
+        .upsert(
+          { book_id: bookId, chapter_seq: chapterSeq, verse_seq: verseSeq, text, chunk_id: chunkId },
+          { onConflict: 'book_id,chapter_seq,verse_seq' }
+        ),
+    'upsert verse'
+  )
 }
 
 async function main() {
@@ -621,6 +654,9 @@ async function main() {
   ensureDir(path.join('data','books'))
   ensureDir(path.join('data','chunks'))
 
+  const totalVersesAll = rawVerses.length
+  let processedVerses = 0
+
   for (const book of orderedBooks) {
     if (bookFilter && book !== bookFilter) continue
     const verses = byBook.get(book)!;
@@ -681,10 +717,12 @@ async function main() {
         await upsertVerse(bookId, v.chapter, v.verse, verseObj.text, chunkId)
       }
     }
-    console.log('Completed book', book)
+    processedVerses += verses.length
+    const pct = ((processedVerses / totalVersesAll) * 100).toFixed(2)
+    console.log(`Completed book ${book} (${processedVerses}/${totalVersesAll} verses, ${pct}% )`)
   }
 
-  console.log('Ingestion complete.')
+  console.log('Ingestion complete. 100% of selected verses processed.')
 }
 
 main().catch(e => { console.error(e); process.exit(1) })

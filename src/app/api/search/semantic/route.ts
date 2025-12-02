@@ -5,7 +5,7 @@ import { embedText } from '@/lib/openai'
 // New semantic verse search using chunk-level embeddings (512 dims)
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}))
-  const { query, topK = 25, includeLexical = true } = body
+  const { query, topK = 25, includeLexical = true, bookId, workId, bookSeqMin, bookSeqMax } = body
   if (!query) return NextResponse.json({ error: 'Query required' }, { status: 400 })
   try {
     const embedding = await embedText(query)
@@ -14,7 +14,11 @@ export async function POST(req: NextRequest) {
       query_embedding: embedding,
       match_count: topK,
       include_lexical: includeLexical,
-      lexical_text: includeLexical ? query : null
+      lexical_text: includeLexical ? query : null,
+      p_book_id: bookId ?? null,
+      p_work_id: workId ?? null,
+      p_book_seq_min: bookSeqMin ?? null,
+      p_book_seq_max: bookSeqMax ?? null,
     })
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ verses: data })
