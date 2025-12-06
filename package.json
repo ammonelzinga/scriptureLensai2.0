@@ -10,7 +10,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "postinstall": "node -e \"try{require('fs').mkdirSync('supabase',{recursive:true})}catch(e){}\"",
-    "ingest": "ts-node --esm scripts/ingest_pipeline.ts --bibleTxt data/BibleKJV.txt --workName 'Holy Bible King James Version'"
+    "ingest": "ts-node --esm scripts/ingest_pipeline.ts --bibleTxt data/BibleKJV.txt --workName 'Holy Bible King James Version'",
+    "ingest:bom": "ts-node --esm scripts/ingest_bom.ts --bomTxt data/BookOfMormon.txt --workName 'The Book of Mormon' --sourceName 'Project Gutenberg' --traditionName 'Latter-day Saint'"
     ,"ingest:preflight": "ts-node --esm scripts/preflight_ingest.ts data/BibleKJV.txt"
     ,"test": "jest"
   },

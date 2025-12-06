@@ -1,0 +1,58 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [
+        14,
+        14,
+        14,
+        14
+      ],
+      "verse_numbers": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "combined_text": "And in that day, seven women shall take hold of one man, saying: We will eat our own bread, and wear our own apparel; only let us be called by thy name to take away our reproach. In that day shall the branch of the Lord be beautiful and glorious; the fruit of the earth excellent and comely to them that are escaped of Israel. And it shall come to pass, they that are left in Zion and remain in Jerusalem shall be called holy, every one that is written among the living in Jerusalem— When the Lord shall have washed away the filth of the daughters of Zion, and shall have purged the blood of Jerusalem from the midst thereof by the spirit of judgment and by the spirit of burning.",
+      "verses": [
+        {
+          "chapter": 14,
+          "verse": 1
+        },
+        {
+          "chapter": 14,
+          "verse": 2
+        },
+        {
+          "chapter": 14,
+          "verse": 3
+        },
+        {
+          "chapter": 14,
+          "verse": 4
+        }
+      ]
+    },
+    {
+      "chapter_numbers": [
+        14,
+        14
+      ],
+      "verse_numbers": [
+        5,
+        6
+      ],
+      "combined_text": "And the Lord will create upon every dwelling-place of mount Zion, and upon her assemblies, a cloud and smoke by day and the shining of a flaming fire by night; for upon all the glory of Zion shall be a defence. And there shall be a tabernacle for a shadow in the daytime from the heat, and for a place of refuge, and a covert from storm and from rain.",
+      "verses": [
+        {
+          "chapter": 14,
+          "verse": 5
+        },
+        {
+          "chapter": 14,
+          "verse": 6
+        }
+      ]
+    }
+  ]
+}
