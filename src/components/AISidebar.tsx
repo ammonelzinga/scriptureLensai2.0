@@ -22,6 +22,9 @@ export function AISidebar({ open, onClose }:{ open:boolean; onClose:()=>void }){
             <div className="font-medium">Search Tools</div>
             <button className="text-sm underline" onClick={onClose}>Close</button>
           </div>
+          <div className="px-4 pt-2 text-[11px] text-zinc-600 dark:text-zinc-400">
+            For Concept Search, we recommend showing at least 30 results and expanding the text for each to review context.
+          </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <LexicalSearchCard />
             <ConceptHybridSearchCard />
@@ -39,15 +42,24 @@ function LexicalSearchCard() {
   const [topK, setTopK] = useState(20)
   const [minSimilarity, setMinSimilarity] = useState(0.2)
   const [exactWord, setExactWord] = useState<boolean>(false)
-  const [workId, setWorkId] = useState('')
-  const [bookId, setBookId] = useState('')
+  const [traditionIds, setTraditionIds] = useState<string[]>([])
+  const [sourceIds, setSourceIds] = useState<string[]>([])
+  const [workIds, setWorkIds] = useState<string[]>([])
+  const [bookIds, setBookIds] = useState<string[]>([])
   const [rangeStart, setRangeStart] = useState('')
   const [rangeEnd, setRangeEnd] = useState('')
   const [rangeError, setRangeError] = useState('')
+  const [traditions, setTraditions] = useState<any[]>([])
+  const [sources, setSources] = useState<any[]>([])
   const [works, setWorks] = useState<any[]>([])
   const [books, setBooks] = useState<any[]>([])
   const [results, setResults] = useState<any[]>([])
   const [busy, setBusy] = useState(false)
+  const [traditionsOpen, setTraditionsOpen] = useState(false)
+  const [sourcesOpen, setSourcesOpen] = useState(false)
+  const [worksOpen, setWorksOpen] = useState(false)
+  const [booksOpen, setBooksOpen] = useState(false)
+  const [compactFilters, setCompactFilters] = useState(false)
 
   const autoExpand = (el: HTMLTextAreaElement | null) => {
     if (!el) return
@@ -60,12 +72,34 @@ function LexicalSearchCard() {
     }
   }
 
-  useEffect(()=>{ fetch('/api/catalog/works').then(r=>r.json()).then(j=>setWorks(j.works||[])) },[])
+  useEffect(()=>{ fetch('/api/catalog/traditions').then(r=>r.json()).then(j=>setTraditions(j.traditions||[])) },[])
   useEffect(()=>{
-    const url = workId ? `/api/catalog/books?workId=${workId}` : '/api/catalog/books'
-    fetch(url).then(r=>r.json()).then(j=>setBooks(j.books||[]))
-    setBookId(''); setRangeStart(''); setRangeEnd('')
-  },[workId])
+    // If multiple traditions selected, fetch all sources and filter client-side
+    fetch('/api/catalog/sources').then(r=>r.json()).then(j=>{
+      const all = j.sources||[]
+      if (traditionIds.length===0) setSources(all)
+      else setSources(all.filter((s:any)=> traditionIds.includes(s.tradition_id)))
+    })
+    setSourceIds([]); setWorkIds([]); setBookIds([]); setRangeStart(''); setRangeEnd('')
+  },[traditionIds])
+  useEffect(()=>{
+    // With multiple sources, fetch all works and filter client-side
+    fetch('/api/catalog/works').then(r=>r.json()).then(j=>{
+      const all = j.works||[]
+      if (sourceIds.length===0) setWorks(all)
+      else setWorks(all.filter((w:any)=> sourceIds.includes(w.source_id)))
+    })
+    setWorkIds([]); setBookIds([]); setRangeStart(''); setRangeEnd('')
+  },[sourceIds])
+  useEffect(()=>{
+    // With multiple works, fetch all books and filter client-side
+    fetch('/api/catalog/books').then(r=>r.json()).then(j=>{
+      const all = j.books||[]
+      if (workIds.length===0) setBooks(all)
+      else setBooks(all.filter((b:any)=> workIds.includes(b.work_id)))
+    })
+    setBookIds([]); setRangeStart(''); setRangeEnd('')
+  },[workIds])
   useEffect(()=>{
     const s = books.find(b=>b.id===rangeStart); const e = books.find(b=>b.id===rangeEnd)
     if (s&&e&&s.seq>e.seq) setRangeError('Start must be before End'); else setRangeError('')
@@ -76,8 +110,10 @@ function LexicalSearchCard() {
     setBusy(true)
     try {
       const payload:any = { query, topK, mode, minSimilarity, exactWord }
-      if (workId) payload.workId = workId
-      if (bookId) payload.bookId = bookId
+      if (traditionIds.length) payload.traditionIds = traditionIds
+      if (sourceIds.length) payload.sourceIds = sourceIds
+      if (workIds.length) payload.workIds = workIds
+      if (bookIds.length) payload.bookIds = bookIds
       if (rangeStart) { const s=books.find(b=>b.id===rangeStart); if (s) payload.bookSeqMin = s.seq }
       if (rangeEnd) { const e=books.find(b=>b.id===rangeEnd); if (e) payload.bookSeqMax = e.seq }
       const res = await fetch('/api/search/lexical',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
@@ -105,6 +141,13 @@ function LexicalSearchCard() {
             <span>{query.length} chars</span>
           </div>
         </div>
+      <div className="mt-2 flex items-center justify-end gap-3 text-xs">
+        <button type="button" className="text-zinc-700 dark:text-zinc-300" onClick={()=>{ setTraditionsOpen(true); setSourcesOpen(true); setWorksOpen(true); setBooksOpen(true) }}>Expand all</button>
+        <button type="button" className="text-zinc-700 dark:text-zinc-300" onClick={()=>{ setTraditionsOpen(false); setSourcesOpen(false); setWorksOpen(false); setBooksOpen(false) }}>Collapse all</button>
+        <label className="flex items-center gap-1">
+          <input type="checkbox" checked={compactFilters} onChange={e=>setCompactFilters(e.target.checked)} /> Compact layout
+        </label>
+      </div>
         <div className="flex flex-col gap-1">
           <span className="text-xs text-zinc-600 dark:text-zinc-400">Mode</span>
           <select value={mode} onChange={e=>setMode(e.target.value as any)} className="rounded-md border border-zinc-300 dark:border-zinc-700 px-2 py-2 text-sm">
@@ -112,19 +155,141 @@ function LexicalSearchCard() {
             <option value="chapters">Chapters</option>
           </select>
         </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-xs text-zinc-600 dark:text-zinc-400">Work</span>
-          <select value={workId} onChange={e=>setWorkId(e.target.value)} className="rounded-md border border-zinc-300 dark:border-zinc-700 px-2 py-2 text-sm">
-            <option value="">Any</option>
-            {works.map(w=> <option key={w.id} value={w.id}>{w.abbrev||w.name}</option>)}
-          </select>
+        <div className="col-span-1 sm:col-span-2">
+          <div className="flex items-center justify-between">
+            <button type="button" className="text-xs text-zinc-600 dark:text-zinc-400" onClick={()=>setTraditionsOpen(v=>!v)}>
+              Traditions {traditionIds.length ? `(${traditionIds.length})` : ''} {traditionsOpen ? '▾' : '▸'}
+            </button>
+            {traditionIds.length>0 && (
+              <button type="button" className="text-[11px] underline" onClick={()=>setTraditionIds([])}>Clear</button>
+            )}
+          </div>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {traditionIds.map(id=>{
+              const t = traditions.find(x=>x.id===id)
+              return (
+                <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
+                  {t?.name||id}
+                  <button type="button" className="ml-1" onClick={()=>setTraditionIds(traditionIds.filter(x=>x!==id))}>×</button>
+                </span>
+              )
+            })}
+          </div>
+          {traditionsOpen && (
+            <div className="mt-2 grid grid-cols-2 gap-2">
+            {traditions.map(t=> (
+              <label key={t.id} className="flex items-center gap-2 rounded-md border border-zinc-300 dark:border-zinc-700 px-2 py-2 text-sm">
+                <input type="checkbox" checked={traditionIds.includes(t.id)} onChange={e=>{
+                  const checked = e.target.checked
+                  setTraditionIds(prev => checked ? Array.from(new Set([...prev, t.id])) : prev.filter(x=>x!==t.id))
+                }} />
+                <span>{t.name}</span>
+              </label>
+            ))}
+            </div>
+          )}
         </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-xs text-zinc-600 dark:text-zinc-400">Book</span>
-          <select value={bookId} onChange={e=>setBookId(e.target.value)} className="rounded-md border border-zinc-300 dark:border-zinc-700 px-2 py-2 text-sm">
-            <option value="">Any</option>
-            {books.map(b=> <option key={b.id} value={b.id}>{b.seq}. {b.title}</option>)}
-          </select>
+        <div className="col-span-1 sm:col-span-2">
+          <div className="flex items-center justify-between">
+            <button type="button" className="text-xs text-zinc-600 dark:text-zinc-400" onClick={()=>setSourcesOpen(v=>!v)}>
+              Sources {sourceIds.length ? `(${sourceIds.length})` : ''} {sourcesOpen ? '▾' : '▸'}
+            </button>
+            {sourceIds.length>0 && (
+              <button type="button" className="text-[11px] underline" onClick={()=>setSourceIds([])}>Clear</button>
+            )}
+          </div>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {sourceIds.map(id=>{
+              const s = sources.find(x=>x.id===id)
+              return (
+                <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+                  {s?.name||id}
+                  <button type="button" className="ml-1" onClick={()=>setSourceIds(sourceIds.filter(x=>x!==id))}>×</button>
+                </span>
+              )
+            })}
+          </div>
+          {sourcesOpen && (
+            <div className="mt-2 grid grid-cols-2 gap-2">
+            {sources.map(s=> (
+              <label key={s.id} className="flex items-center gap-2 rounded-md border border-zinc-300 dark:border-zinc-700 px-2 py-2 text-sm">
+                <input type="checkbox" checked={sourceIds.includes(s.id)} onChange={e=>{
+                  const checked = e.target.checked
+                  setSourceIds(prev => checked ? Array.from(new Set([...prev, s.id])) : prev.filter(x=>x!==s.id))
+                }} />
+                <span>{s.name}</span>
+              </label>
+            ))}
+            </div>
+          )}
+        </div>
+        <div className="col-span-1 sm:col-span-2">
+          <div className="flex items-center justify-between">
+            <button type="button" className="text-xs text-zinc-600 dark:text-zinc-400" onClick={()=>setWorksOpen(v=>!v)}>
+              Works {workIds.length ? `(${workIds.length})` : ''} {worksOpen ? '▾' : '▸'}
+            </button>
+            {workIds.length>0 && (
+              <button type="button" className="text-[11px] underline" onClick={()=>setWorkIds([])}>Clear</button>
+            )}
+          </div>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {workIds.map(id=>{
+              const w = works.find(x=>x.id===id)
+              return (
+                <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200">
+                  {w?.abbrev||w?.name||id}
+                  <button type="button" className="ml-1" onClick={()=>setWorkIds(workIds.filter(x=>x!==id))}>×</button>
+                </span>
+              )
+            })}
+          </div>
+          {worksOpen && (
+            <div className="mt-2 grid grid-cols-2 gap-2">
+            {works.map(w=> (
+              <label key={w.id} className="flex items-center gap-2 rounded-md border border-zinc-300 dark:border-zinc-700 px-2 py-2 text-sm">
+                <input type="checkbox" checked={workIds.includes(w.id)} onChange={e=>{
+                  const checked = e.target.checked
+                  setWorkIds(prev => checked ? Array.from(new Set([...prev, w.id])) : prev.filter(x=>x!==w.id))
+                }} />
+                <span>{w.abbrev||w.name}</span>
+              </label>
+            ))}
+            </div>
+          )}
+        </div>
+        <div className="col-span-1 sm:col-span-2">
+          <div className="flex items-center justify-between">
+            <button type="button" className="text-xs text-zinc-600 dark:text-zinc-400" onClick={()=>setBooksOpen(v=>!v)}>
+              Books {bookIds.length ? `(${bookIds.length})` : ''} {booksOpen ? '▾' : '▸'}
+            </button>
+            {bookIds.length>0 && (
+              <button type="button" className="text-[11px] underline" onClick={()=>setBookIds([])}>Clear</button>
+            )}
+          </div>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {bookIds.map(id=>{
+              const b = books.find(x=>x.id===id)
+              return (
+                <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200">
+                  {(b?.seq ? `${b.seq}. ` : '') + (b?.title||id)}
+                  <button type="button" className="ml-1" onClick={()=>setBookIds(bookIds.filter(x=>x!==id))}>×</button>
+                </span>
+              )
+            })}
+          </div>
+          {booksOpen && (
+            <div className="mt-2 grid grid-cols-2 gap-2">
+            {books.map(b=> (
+              <label key={b.id} className="flex items-center gap-2 rounded-md border border-zinc-300 dark:border-zinc-700 px-2 py-2 text-sm">
+                <input type="checkbox" checked={bookIds.includes(b.id)} onChange={e=>{
+                  const checked = e.target.checked
+                  setBookIds(prev => checked ? Array.from(new Set([...prev, b.id])) : prev.filter(x=>x!==b.id))
+                }} />
+                <span>{b.seq}. {b.title}</span>
+              </label>
+            ))}
+            </div>
+          )}
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-xs text-zinc-600 dark:text-zinc-400">Range (Start / End)</span>
@@ -201,11 +366,15 @@ function AskQuestionCard() {
   const [topK, setTopK] = useState<string>('10')
   const [devtools, setDevtools] = useState<boolean>(false)
   const [versesPerChapter, setVersesPerChapter] = useState<number>(3)
-  const [testament, setTestament] = useState<string>('')
-  const [bookId, setBookId] = useState<string>('')
-  const [workId, setWorkId] = useState<string>('')
+  // Removed Testament filter; replace with Tradition/Source chain
+  const [bookIds, setBookIds] = useState<string[]>([])
+  const [workIds, setWorkIds] = useState<string[]>([])
+  const [traditionIds, setTraditionIds] = useState<string[]>([])
+  const [sourceIds, setSourceIds] = useState<string[]>([])
   const [works, setWorks] = useState<any[]>([])
   const [books, setBooks] = useState<any[]>([])
+  const [traditions, setTraditions] = useState<any[]>([])
+  const [sources, setSources] = useState<any[]>([])
   const [rangeStart, setRangeStart] = useState<string>('')
   const [rangeEnd, setRangeEnd] = useState<string>('')
   const [rangeError, setRangeError] = useState<string>('')
@@ -213,8 +382,29 @@ function AskQuestionCard() {
   const [hybrid, setHybrid] = useState<boolean>(false)
   const [pinVerseId, setPinVerseId] = useState<string>('')
   const [lexicalWeight, setLexicalWeight] = useState<number>(0.15)
+  const [traditionsOpen, setTraditionsOpen] = useState(false)
+  const [sourcesOpen, setSourcesOpen] = useState(false)
+  const [worksOpen, setWorksOpen] = useState(false)
+  const [booksOpen, setBooksOpen] = useState(false)
+  const [compactFilters, setCompactFilters] = useState(false)
 
-  useEffect(() => { fetch('/api/catalog/works').then(r=>r.json()).then(j=>setWorks(j.works||[])) }, [])
+  useEffect(() => { fetch('/api/catalog/traditions').then(r=>r.json()).then(j=>setTraditions(j.traditions||[])) }, [])
+  useEffect(() => {
+    fetch('/api/catalog/sources').then(r=>r.json()).then(j=>{
+      const all = j.sources||[]
+      if (traditionIds.length===0) setSources(all)
+      else setSources(all.filter((s:any)=> traditionIds.includes(s.tradition_id)))
+    })
+    setSourceIds([]); setWorkIds([]); setBookIds([]); setRangeStart(''); setRangeEnd('')
+  }, [traditionIds])
+  useEffect(() => {
+    fetch('/api/catalog/works').then(r=>r.json()).then(j=>{
+      const all = j.works||[]
+      if (sourceIds.length===0) setWorks(all)
+      else setWorks(all.filter((w:any)=> sourceIds.includes(w.source_id)))
+    })
+    setWorkIds([]); setBookIds([]); setRangeStart(''); setRangeEnd('')
+  }, [sourceIds])
   useEffect(() => {
     if (typeof window === 'undefined') return
     const savedHybrid = localStorage.getItem('sl_hybrid')
@@ -223,41 +413,44 @@ function AskQuestionCard() {
   useEffect(() => { if(typeof window!=='undefined') localStorage.setItem('sl_hybrid', hybrid?'1':'0') }, [hybrid])
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    const w = params.get('workId') || ''
-    const b = params.get('bookId') || ''
+    const w = params.getAll('workId')
+    const b = params.getAll('bookId')
     const rs = params.get('rangeStart') || ''
     const re = params.get('rangeEnd') || ''
-    const t = params.get('testament') || ''
+    // testament removed
     const tk = params.get('topK')
     const vpc = params.get('versesPerChapter')
-    if (w) setWorkId(w)
-    if (b) setBookId(b)
+    if (w && w.length) setWorkIds(w)
+    if (b && b.length) setBookIds(b)
     if (rs) setRangeStart(rs)
     if (re) setRangeEnd(re)
-    if (t) setTestament(t)
+    // testament removed
     if (tk) setTopK(tk)
     if (vpc) setVersesPerChapter(Number(vpc))
   }, [])
   useEffect(() => {
     const params = new URLSearchParams()
-    if (workId) params.set('workId', workId)
-    if (bookId) params.set('bookId', bookId)
+    for (const w of workIds) params.append('workId', w)
+    for (const b of bookIds) params.append('bookId', b)
     if (rangeStart) params.set('rangeStart', rangeStart)
     if (rangeEnd) params.set('rangeEnd', rangeEnd)
-    if (testament) params.set('testament', testament)
+    // testament removed
     params.set('topK', topK)
     params.set('versesPerChapter', String(versesPerChapter))
     const qs = params.toString()
     const url = qs ? `?${qs}` : ''
     window.history.replaceState(null, '', url)
-  }, [workId, bookId, rangeStart, rangeEnd, testament, topK, versesPerChapter])
+  }, [workIds, bookIds, rangeStart, rangeEnd, topK, versesPerChapter])
   useEffect(() => {
-    const url = workId ? `/api/catalog/books?workId=${encodeURIComponent(workId)}` : '/api/catalog/books'
-    fetch(url).then(r=>r.json()).then(j=>setBooks(j.books||[]))
-    setBookId('')
+    fetch('/api/catalog/books').then(r=>r.json()).then(j=>{
+      const all = j.books||[]
+      if (workIds.length===0) setBooks(all)
+      else setBooks(all.filter((b:any)=> workIds.includes(b.work_id)))
+    })
+    setBookIds([])
     setRangeStart('')
     setRangeEnd('')
-  }, [workId])
+  }, [workIds])
   useEffect(() => {
     const bStart = books.find(b => b.id === rangeStart)
     const bEnd = books.find(b => b.id === rangeEnd)
@@ -275,9 +468,10 @@ function AskQuestionCard() {
       if (hybrid) payload.lexicalWeight = lexicalWeight
       const pinTrim = pinVerseId.trim()
       if (pinTrim) payload.verseId = pinTrim
-      if (testament) payload.testament = testament
-      if (bookId) payload.bookId = bookId
-      if (workId) payload.workId = workId
+      if (traditionIds.length) payload.traditionIds = traditionIds
+      if (sourceIds.length) payload.sourceIds = sourceIds
+      if (bookIds.length) payload.bookIds = bookIds
+      if (workIds.length) payload.workIds = workIds
       if (rangeStart) {
         const bStart = books.find(b => b.id === rangeStart)
         if (bStart) payload.bookSeqMin = bStart.seq
@@ -330,27 +524,141 @@ function AskQuestionCard() {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-zinc-600 dark:text-zinc-400">Testament</label>
-          <select value={testament} onChange={e=>setTestament(e.target.value)} className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 px-2 py-2 text-sm">
-            <option value="">Any</option>
-            <option value="old">Old</option>
-            <option value="new">New</option>
-          </select>
+        <div className="col-span-1 sm:col-span-2">
+          <div className="flex items-center justify-between">
+            <button type="button" className="text-xs text-zinc-600 dark:text-zinc-400" onClick={()=>setTraditionsOpen(v=>!v)}>
+              Traditions {traditionIds.length ? `(${traditionIds.length})` : ''} {traditionsOpen ? '▾' : '▸'}
+            </button>
+            {traditionIds.length>0 && (
+              <button type="button" className="text-[11px] underline" onClick={()=>setTraditionIds([])}>Clear</button>
+            )}
+          </div>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {traditionIds.map(id=>{
+              const t = traditions.find(x=>x.id===id)
+              return (
+                <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
+                  {t?.name||id}
+                  <button type="button" className="ml-1" onClick={()=>setTraditionIds(traditionIds.filter(x=>x!==id))}>×</button>
+                </span>
+              )
+            })}
+          </div>
+          {traditionsOpen && (
+            <div className={`mt-2 grid ${compactFilters ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
+              {traditions.map(t=> (
+                <label key={t.id} className={`flex items-center gap-2 rounded-md border border-zinc-300 dark:border-zinc-700 ${compactFilters ? 'px-2 py-1' : 'px-2 py-2'} text-sm`}>
+                  <input type="checkbox" checked={traditionIds.includes(t.id)} onChange={e=>{
+                    const checked = e.target.checked
+                    setTraditionIds(prev => checked ? Array.from(new Set([...prev, t.id])) : prev.filter(x=>x!==t.id))
+                  }} />
+                  <span>{t.name}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-zinc-600 dark:text-zinc-400">Work</label>
-          <select value={workId} onChange={e=>setWorkId(e.target.value)} className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 px-2 py-2 text-sm">
-            <option value="">Any</option>
-            {works.map(w=> <option key={w.id} value={w.id}>{w.abbrev || w.name}</option>)}
-          </select>
+        <div className="col-span-1 sm:col-span-2">
+          <div className="flex items-center justify-between">
+            <button type="button" className="text-xs text-zinc-600 dark:text-zinc-400" onClick={()=>setSourcesOpen(v=>!v)}>
+              Sources {sourceIds.length ? `(${sourceIds.length})` : ''} {sourcesOpen ? '▾' : '▸'}
+            </button>
+            {sourceIds.length>0 && (
+              <button type="button" className="text-[11px] underline" onClick={()=>setSourceIds([])}>Clear</button>
+            )}
+          </div>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {sourceIds.map(id=>{
+              const s = sources.find(x=>x.id===id)
+              return (
+                <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+                  {s?.name||id}
+                  <button type="button" className="ml-1" onClick={()=>setSourceIds(sourceIds.filter(x=>x!==id))}>×</button>
+                </span>
+              )
+            })}
+          </div>
+          {sourcesOpen && (
+            <div className={`mt-2 grid ${compactFilters ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
+              {sources.map(s=> (
+                <label key={s.id} className={`flex items-center gap-2 rounded-md border border-zinc-300 dark:border-zinc-700 ${compactFilters ? 'px-2 py-1' : 'px-2 py-2'} text-sm`}>
+                  <input type="checkbox" checked={sourceIds.includes(s.id)} onChange={e=>{
+                    const checked = e.target.checked
+                    setSourceIds(prev => checked ? Array.from(new Set([...prev, s.id])) : prev.filter(x=>x!==s.id))
+                  }} />
+                  <span>{s.name}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-zinc-600 dark:text-zinc-400">Book</label>
-          <select value={bookId} onChange={e=>setBookId(e.target.value)} className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 px-2 py-2 text-sm">
-            <option value="">Any</option>
-            {books.map(b=> <option key={b.id} value={b.id}>{b.seq}. {b.title}</option>)}
-          </select>
+        <div className="col-span-1 sm:col-span-2">
+          <div className="flex items-center justify-between">
+            <button type="button" className="text-xs text-zinc-600 dark:text-zinc-400" onClick={()=>setWorksOpen(v=>!v)}>
+              Works {workIds.length ? `(${workIds.length})` : ''} {worksOpen ? '▾' : '▸'}
+            </button>
+            {workIds.length>0 && (
+              <button type="button" className="text-[11px] underline" onClick={()=>setWorkIds([])}>Clear</button>
+            )}
+          </div>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {workIds.map(id=>{
+              const w = works.find(x=>x.id===id)
+              return (
+                <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200">
+                  {w?.abbrev||w?.name||id}
+                  <button type="button" className="ml-1" onClick={()=>setWorkIds(workIds.filter(x=>x!==id))}>×</button>
+                </span>
+              )
+            })}
+          </div>
+          {worksOpen && (
+            <div className={`mt-2 grid ${compactFilters ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
+              {works.map(w=> (
+                <label key={w.id} className={`flex items-center gap-2 rounded-md border border-zinc-300 dark:border-zinc-700 ${compactFilters ? 'px-2 py-1' : 'px-2 py-2'} text-sm`}>
+                  <input type="checkbox" checked={workIds.includes(w.id)} onChange={e=>{
+                    const checked = e.target.checked
+                    setWorkIds(prev => checked ? Array.from(new Set([...prev, w.id])) : prev.filter(x=>x!==w.id))
+                  }} />
+                  <span>{w.abbrev||w.name}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="col-span-1 sm:col-span-2">
+          <div className="flex items-center justify-between">
+            <button type="button" className="text-xs text-zinc-600 dark:text-zinc-400" onClick={()=>setBooksOpen(v=>!v)}>
+              Books {bookIds.length ? `(${bookIds.length})` : ''} {booksOpen ? '▾' : '▸'}
+            </button>
+            {bookIds.length>0 && (
+              <button type="button" className="text-[11px] underline" onClick={()=>setBookIds([])}>Clear</button>
+            )}
+          </div>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {bookIds.map(id=>{
+              const b = books.find(x=>x.id===id)
+              return (
+                <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200">
+                  {(b?.seq ? `${b.seq}. ` : '') + (b?.title||id)}
+                  <button type="button" className="ml-1" onClick={()=>setBookIds(bookIds.filter(x=>x!==id))}>×</button>
+                </span>
+              )}
+            )}
+          </div>
+          {booksOpen && (
+            <div className={`mt-2 grid ${compactFilters ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
+              {books.map(b=> (
+                <label key={b.id} className={`flex items-center gap-2 rounded-md border border-zinc-300 dark:border-zinc-700 ${compactFilters ? 'px-2 py-1' : 'px-2 py-2'} text-sm`}>
+                  <input type="checkbox" checked={bookIds.includes(b.id)} onChange={e=>{
+                    const checked = e.target.checked
+                    setBookIds(prev => checked ? Array.from(new Set([...prev, b.id])) : prev.filter(x=>x!==b.id))
+                  }} />
+                  <span>{b.seq}. {b.title}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <label className="text-xs text-zinc-600 dark:text-zinc-400">Pin verse ID</label>

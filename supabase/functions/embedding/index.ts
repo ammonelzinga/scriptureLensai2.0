@@ -30,6 +30,10 @@ type SearchBody = {
   topK?: number
   mode?: 'semantic' | 'lexical' | 'hybrid'
   excludeSelf?: boolean
+  traditionIds?: string[]
+  sourceIds?: string[]
+  workIds?: string[]
+  bookIds?: string[]
 }
 
 function json(data: unknown, status = 200) {
@@ -41,12 +45,20 @@ export const handler = async (req: Request): Promise<Response> => {
   let body: SearchBody
   try { body = await req.json() } catch { return json({ error: 'Invalid JSON' }, 400) }
 
-  const { query, verseId, topK = 25, mode = 'semantic', excludeSelf = true } = body
+  const { query, verseId, topK = 25, mode = 'semantic', excludeSelf = true, traditionIds, sourceIds, workIds, bookIds } = body
 
   try {
     if (verseId && mode === 'semantic') {
       // Similar verses to given verse
-      const { data, error } = await sb.rpc('semantic_search_by_verse', { verse_uuid: verseId, match_count: topK, exclude_self: excludeSelf })
+      const { data, error } = await sb.rpc('semantic_search_by_verse', {
+        verse_uuid: verseId,
+        match_count: topK,
+        exclude_self: excludeSelf,
+        p_tradition_ids: traditionIds ?? null,
+        p_source_ids: sourceIds ?? null,
+        p_work_ids: workIds ?? null,
+        p_book_ids: bookIds ?? null
+      })
       if (error) return json({ error: error.message }, 500)
       return json({ verses: data })
     }
@@ -54,7 +66,14 @@ export const handler = async (req: Request): Promise<Response> => {
     if (!query) return json({ error: 'query required for this mode' }, 400)
 
     if (mode === 'lexical') {
-      const { data, error } = await sb.rpc('lexical_search_verses', { q: query, match_count: topK })
+      const { data, error } = await sb.rpc('lexical_search_verses', {
+        q: query,
+        match_count: topK,
+        p_tradition_ids: traditionIds ?? null,
+        p_source_ids: sourceIds ?? null,
+        p_work_ids: workIds ?? null,
+        p_book_ids: bookIds ?? null
+      })
       if (error) return json({ error: error.message }, 500)
       return json({ verses: data })
     }
@@ -65,7 +84,11 @@ export const handler = async (req: Request): Promise<Response> => {
       query_embedding: queryEmbedding,
       match_count: topK,
       include_lexical: mode === 'hybrid',
-      lexical_text: mode === 'hybrid' ? query : null
+      lexical_text: mode === 'hybrid' ? query : null,
+      p_tradition_ids: traditionIds ?? null,
+      p_source_ids: sourceIds ?? null,
+      p_work_ids: workIds ?? null,
+      p_book_ids: bookIds ?? null
     })
     if (error) return json({ error: error.message }, 500)
     return json({ verses: data })

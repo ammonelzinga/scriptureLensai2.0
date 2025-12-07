@@ -103,8 +103,10 @@ create index if not exists verses_text_trgm_idx on verses using gin (text gin_tr
 create or replace function match_embedding_chunks(
   query_embedding vector(512),
   match_count int default 10,
-  p_book_id uuid default null,
-  p_work_id uuid default null,
+  p_book_ids uuid[] default null,
+  p_work_ids uuid[] default null,
+  p_source_ids uuid[] default null,
+  p_tradition_ids uuid[] default null,
   p_book_seq_min int default null,
   p_book_seq_max int default null
 )
@@ -119,8 +121,13 @@ begin
          1 - (c.embedding <=> query_embedding) as score
   from embedding_chunks c
   join books b on b.id = c.book_id
-  where (p_book_id is null or c.book_id = p_book_id)
-    and (p_work_id is null or b.work_id = p_work_id)
+  join works w on w.id = b.work_id
+  join sources s on s.id = w.source_id
+  join traditions t on t.id = s.tradition_id
+  where (p_book_ids is null or c.book_id = any(p_book_ids))
+    and (p_work_ids is null or b.work_id = any(p_work_ids))
+    and (p_source_ids is null or s.id = any(p_source_ids))
+    and (p_tradition_ids is null or t.id = any(p_tradition_ids))
     and (p_book_seq_min is null or b.seq >= p_book_seq_min)
     and (p_book_seq_max is null or b.seq <= p_book_seq_max)
   order by c.embedding <=> query_embedding
@@ -134,8 +141,10 @@ create or replace function semantic_search_verses(
   match_count int default 25,
   include_lexical boolean default true,
   lexical_text text default null,
-  p_book_id uuid default null,
-  p_work_id uuid default null,
+  p_book_ids uuid[] default null,
+  p_work_ids uuid[] default null,
+  p_source_ids uuid[] default null,
+  p_tradition_ids uuid[] default null,
   p_book_seq_min int default null,
   p_book_seq_max int default null
 )
@@ -160,8 +169,13 @@ begin
     select c.id, 1 - (c.embedding <=> query_embedding) as score
     from embedding_chunks c
     join books b on b.id = c.book_id
-    where (p_book_id is null or c.book_id = p_book_id)
-      and (p_work_id is null or b.work_id = p_work_id)
+    join works w on w.id = b.work_id
+    join sources s on s.id = w.source_id
+    join traditions t on t.id = s.tradition_id
+    where (p_book_ids is null or c.book_id = any(p_book_ids))
+      and (p_work_ids is null or b.work_id = any(p_work_ids))
+      and (p_source_ids is null or s.id = any(p_source_ids))
+      and (p_tradition_ids is null or t.id = any(p_tradition_ids))
       and (p_book_seq_min is null or b.seq >= p_book_seq_min)
       and (p_book_seq_max is null or b.seq <= p_book_seq_max)
     order by c.embedding <=> query_embedding
@@ -188,8 +202,10 @@ create or replace function semantic_search_by_verse(
   verse_uuid uuid,
   match_count int default 20,
   exclude_self boolean default true,
-  p_book_id uuid default null,
-  p_work_id uuid default null,
+  p_book_ids uuid[] default null,
+  p_work_ids uuid[] default null,
+  p_source_ids uuid[] default null,
+  p_tradition_ids uuid[] default null,
   p_book_seq_min int default null,
   p_book_seq_max int default null
 )
@@ -218,8 +234,13 @@ begin
     select ec.id, 1 - (ec.embedding <=> s.embedding) as score
     from embedding_chunks ec, src s
     join books b on b.id = ec.book_id
-    where (p_book_id is null or ec.book_id = p_book_id)
-      and (p_work_id is null or b.work_id = p_work_id)
+    join works w on w.id = b.work_id
+    join sources s2 on s2.id = w.source_id
+    join traditions t on t.id = s2.tradition_id
+    where (p_book_ids is null or ec.book_id = any(p_book_ids))
+      and (p_work_ids is null or b.work_id = any(p_work_ids))
+      and (p_source_ids is null or s2.id = any(p_source_ids))
+      and (p_tradition_ids is null or t.id = any(p_tradition_ids))
       and (p_book_seq_min is null or b.seq >= p_book_seq_min)
       and (p_book_seq_max is null or b.seq <= p_book_seq_max)
     order by ec.embedding <=> s.embedding
@@ -245,8 +266,10 @@ $$;
 create or replace function lexical_search_verses(
   q text,
   match_count int default 20,
-  p_book_id uuid default null,
-  p_work_id uuid default null,
+  p_book_ids uuid[] default null,
+  p_work_ids uuid[] default null,
+  p_source_ids uuid[] default null,
+  p_tradition_ids uuid[] default null,
   p_book_seq_min int default null,
   p_book_seq_max int default null
 )
@@ -255,9 +278,14 @@ language sql stable as $$
   select v.id, v.book_id, v.chapter_seq, v.verse_seq, v.text, similarity(v.text, q) as similarity
   from verses v
   join books b on b.id = v.book_id
+  join works w on w.id = b.work_id
+  join sources s on s.id = w.source_id
+  join traditions t on t.id = s.tradition_id
   where v.text % q
-    and (p_book_id is null or v.book_id = p_book_id)
-    and (p_work_id is null or b.work_id = p_work_id)
+    and (p_book_ids is null or v.book_id = any(p_book_ids))
+    and (p_work_ids is null or b.work_id = any(p_work_ids))
+    and (p_source_ids is null or s.id = any(p_source_ids))
+    and (p_tradition_ids is null or t.id = any(p_tradition_ids))
     and (p_book_seq_min is null or b.seq >= p_book_seq_min)
     and (p_book_seq_max is null or b.seq <= p_book_seq_max)
   order by similarity(v.text, q) desc
@@ -268,8 +296,10 @@ $$;
 create or replace function lexical_search_word_exact(
   q text,
   match_count int default 20,
-  p_book_id uuid default null,
-  p_work_id uuid default null,
+  p_book_ids uuid[] default null,
+  p_work_ids uuid[] default null,
+  p_source_ids uuid[] default null,
+  p_tradition_ids uuid[] default null,
   p_book_seq_min int default null,
   p_book_seq_max int default null
 )
@@ -278,9 +308,15 @@ language sql stable as $$
   select v.id, v.book_id, v.chapter_seq, v.verse_seq, v.text
   from verses v
   join books b on b.id = v.book_id
-  where v.text ~* ('\\m' || q || '\\M')
-    and (p_book_id is null or v.book_id = p_book_id)
-    and (p_work_id is null or b.work_id = p_work_id)
+  join works w on w.id = b.work_id
+  join sources s on s.id = w.source_id
+  join traditions t on t.id = s.tradition_id
+  -- exact token match using full-text search with the 'simple' config (no stemming)
+  where to_tsvector('simple', v.text) @@ to_tsquery('simple', q)
+    and (p_book_ids is null or v.book_id = any(p_book_ids))
+    and (p_work_ids is null or b.work_id = any(p_work_ids))
+    and (p_source_ids is null or s.id = any(p_source_ids))
+    and (p_tradition_ids is null or t.id = any(p_tradition_ids))
     and (p_book_seq_min is null or b.seq >= p_book_seq_min)
     and (p_book_seq_max is null or b.seq <= p_book_seq_max)
   order by v.book_id, v.chapter_seq, v.verse_seq

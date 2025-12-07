@@ -62,6 +62,12 @@ async function searchChunksByVerseId(verseId: string, topK: number) {
     verse_uuid: verseId,
     match_count: topK,
     exclude_self: false, // include the source verse/chunk to satisfy parent-chunk presence
+    p_book_ids: null,
+    p_work_ids: null,
+    p_source_ids: null,
+    p_tradition_ids: null,
+    p_book_seq_min: null,
+    p_book_seq_max: null,
   })
   if (error) throw error
   // Map to chunk_id + score for uniformity

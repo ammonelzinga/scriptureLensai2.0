@@ -398,6 +398,7 @@ async function main() {
   const embedFromCache = args['embedFromCache'] === 'true'
   const parseOnly = args['parseOnly'] === 'true'
   const useParsedDir = (args['useParsedDir'] as string) || ''
+  const introOwnChunk = args['introOwnChunk'] === 'true' // if true, emit chapter 0 as its own chunk
   const maxRetriesArg = args['maxRetries'] as string | undefined
   const throttleMsArg = args['throttleMs'] as string | undefined
   const initialBackoffMsArg = args['initialBackoffMs'] as string | undefined
@@ -407,7 +408,7 @@ async function main() {
   if (initialBackoffMsArg !== undefined) INITIAL_BACKOFF_MS = Math.max(50, Number(initialBackoffMsArg) || 300)
 
   const mask = (v?: string) => v ? (v.length <= 12 ? v : v.slice(0,4)+'…'+v.slice(-4)) : 'MISSING'
-  console.log('BOM Ingest starting', { bomTxt, workName, sourceName, traditionName, bookFilter, startAt, force, dryRun, noChunkGPT, cacheChunks, embedFromCache, chunkModel: chunkModel || process.env.OPENAI_CHUNK_MODEL || 'gpt-4.1-mini', model: EMBEDDING_MODEL, dims: EMBEDDING_DIMENSIONS, maxRetries: MAX_RETRIES, throttleMs: THROTTLE_MS, initialBackoffMs: INITIAL_BACKOFF_MS, SUPABASE_URL: process.env.SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY: mask(process.env.SUPABASE_SERVICE_ROLE_KEY), OPENAI_API_KEY: mask(process.env.OPENAI_API_KEY) })
+  console.log('BOM Ingest starting', { bomTxt, workName, sourceName, traditionName, bookFilter, startAt, force, dryRun, noChunkGPT, cacheChunks, embedFromCache, introOwnChunk, chunkModel: chunkModel || process.env.OPENAI_CHUNK_MODEL || 'gpt-4.1-mini', model: EMBEDDING_MODEL, dims: EMBEDDING_DIMENSIONS, maxRetries: MAX_RETRIES, throttleMs: THROTTLE_MS, initialBackoffMs: INITIAL_BACKOFF_MS, SUPABASE_URL: process.env.SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY: mask(process.env.SUPABASE_SERVICE_ROLE_KEY), OPENAI_API_KEY: mask(process.env.OPENAI_API_KEY) })
 
   let rawVerses: RawVerse[] = []
   if (useParsedDir) {
@@ -458,19 +459,17 @@ async function main() {
     if (parseOnly) { console.log('[parseOnly] wrote', `data/books_bom/${book}.json`); processedVerses += verses.length; continue }
 
     const allChunks: ChunkOutput[] = []
-    // Include chapter 0 (introductions) as a single chunk [0:0]
     const chapterKeys = Object.keys(bookOut.chapters).map(n=>Number(n))
-    if (chapterKeys.includes(0)) {
-      const introVerses = bookOut.chapters[0]
-      const introText = introVerses.map(v=>v.text).join(' ').trim()
-      if (introText) {
-        allChunks.push({
-          chapter_numbers: [0],
-          verse_numbers: [0],
-          combined_text: introText,
-          verses: [{ chapter: 0, verse: 0 }]
-        })
-      }
+    // Capture introduction text (chapter 0)
+    const introText = chapterKeys.includes(0) ? bookOut.chapters[0].map(v=>v.text).join(' ').trim() : ''
+    // If emitting intro as its own chunk, push it now (will require DB constraint allowing 1-verse chunks when chapter_numbers contains 0)
+    if (introText && introOwnChunk) {
+      allChunks.push({
+        chapter_numbers: [0],
+        verse_numbers: [0],
+        combined_text: introText,
+        verses: [{ chapter: 0, verse: 0 }]
+      })
     }
     for (const chapterNumber of chapterKeys.filter(n=>n>0).sort((a,b)=>a-b)) {
       const chapterVerses = bookOut.chapters[chapterNumber]
@@ -489,6 +488,14 @@ async function main() {
         const chChunks = heuristicChunkChapter(chapterNumber, chapterVerses)
         allChunks.push(...chChunks)
       }
+    }
+
+    // If not emitting intro as its own chunk, prepend to the first real chunk to satisfy min-verse constraint
+    if (introText && !introOwnChunk && allChunks.length > 0) {
+      allChunks[0].combined_text = `${introText} ${allChunks[0].combined_text}`.trim()
+      allChunks[0].chapter_numbers = [0, ...allChunks[0].chapter_numbers]
+      allChunks[0].verse_numbers = [0, ...allChunks[0].verse_numbers]
+      allChunks[0].verses = [{ chapter: 0, verse: 0 }, ...allChunks[0].verses]
     }
 
     fs.writeFileSync(path.join('data','chunks_bom', `${book}.json`), JSON.stringify({ book, chunks: allChunks }, null, 2))

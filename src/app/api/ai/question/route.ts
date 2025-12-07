@@ -12,7 +12,13 @@ export async function POST(req: NextRequest) {
     hybrid = true,
     lexicalWeight = 0.15,
     bookId,
-    testament,                 // 'old' | 'new'
+    // testament removed in UI; prefer tradition/source/work filters
+    traditionId,
+    sourceId,
+    bookIds,
+    workIds,
+    traditionIds,
+    sourceIds,
     bookSeqMin,
     bookSeqMax,
     verseId
@@ -33,6 +39,12 @@ export async function POST(req: NextRequest) {
       verse_uuid: verseId,
       match_count: Math.max(approxNeeded, 50),
       exclude_self: false,
+      p_book_ids: Array.isArray(bookIds) && bookIds.length ? bookIds : (bookId ? [bookId] : null),
+      p_work_ids: Array.isArray(workIds) && workIds.length ? workIds : null,
+      p_source_ids: Array.isArray(sourceIds) && sourceIds.length ? sourceIds : null,
+      p_tradition_ids: Array.isArray(traditionIds) && traditionIds.length ? traditionIds : null,
+      p_book_seq_min: (typeof bookSeqMin === 'number' ? bookSeqMin : null),
+      p_book_seq_max: (typeof bookSeqMax === 'number' ? bookSeqMax : null),
     })
     if (seedErr) return NextResponse.json({ error: seedErr.message }, { status: 500 })
     const seededRows = (seeded || []) as Array<{ verse_id: string; book_id: string; chapter_seq: number; verse_seq: number; text: string; match_chunk: string; chunk_score: number }>
@@ -56,10 +68,12 @@ export async function POST(req: NextRequest) {
       match_count: approxNeeded,
       include_lexical: hybrid,
       lexical_text: hybrid ? question : null,
-      p_book_id: bookId ?? null,
-      p_work_id: null,
-      p_book_seq_min: (testament === 'new' ? 40 : (testament === 'old' ? 1 : (typeof bookSeqMin === 'number' ? bookSeqMin : null))),
-      p_book_seq_max: (testament === 'old' ? 39 : (testament === 'new' ? 66 : (typeof bookSeqMax === 'number' ? bookSeqMax : null))),
+      p_book_ids: Array.isArray(bookIds) && bookIds.length ? bookIds : (bookId ? [bookId] : null),
+      p_work_ids: Array.isArray(workIds) && workIds.length ? workIds : null,
+      p_source_ids: Array.isArray(sourceIds) && sourceIds.length ? sourceIds : null,
+      p_tradition_ids: Array.isArray(traditionIds) && traditionIds.length ? traditionIds : null,
+      p_book_seq_min: (typeof bookSeqMin === 'number' ? bookSeqMin : null),
+      p_book_seq_max: (typeof bookSeqMax === 'number' ? bookSeqMax : null),
     })
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     const more = (data || []) as Row[]
@@ -122,8 +136,8 @@ export async function POST(req: NextRequest) {
   const chunksMap = new Map<string, any>((chunksData || []).map((c:any)=>[c.id, c]))
 
   // Fetch book info for labels and seq filtering
-  const bookIds = Array.from(new Set((chunksData || []).map((c:any)=> c.book_id)))
-  const { data: booksData } = await sb.from('books').select('id, title, seq').in('id', bookIds)
+  const chunkBookIds = Array.from(new Set((chunksData || []).map((c:any)=> c.book_id)))
+  const { data: booksData } = await sb.from('books').select('id, title, seq').in('id', chunkBookIds)
   const booksMap = new Map<string, any>((booksData || []).map((b:any)=>[b.id, b]))
 
   // Build chunk cards and apply filters
@@ -228,10 +242,32 @@ export async function POST(req: NextRequest) {
 
   // Apply optional filters
   if (bookId) cards = cards.filter(c => c.chunk.book_id === bookId)
+  if (Array.isArray(bookIds) && bookIds.length) cards = cards.filter(c => c.chunk.book_id && bookIds.includes(String(c.chunk.book_id)))
   if (typeof bookSeqMin === 'number') cards = cards.filter(c => (c.chunk.book_seq ?? 0) >= bookSeqMin)
   if (typeof bookSeqMax === 'number') cards = cards.filter(c => (c.chunk.book_seq ?? 9999) <= bookSeqMax)
-  if (testament === 'old') cards = cards.filter(c => (c.chunk.book_seq ?? 0) <= 39)
-  if (testament === 'new') cards = cards.filter(c => (c.chunk.book_seq ?? 0) >= 40)
+  // Post-filter by source/tradition if provided
+  if (sourceId || traditionId || (Array.isArray(sourceIds)&&sourceIds.length) || (Array.isArray(traditionIds)&&traditionIds.length) || (Array.isArray(workIds)&&workIds.length)) {
+    const bookIds = Array.from(new Set(cards.map(c=>c.chunk.book_id).filter(Boolean))) as string[]
+    const { data: booksWorks } = await sb.from('books').select('id, work_id').in('id', bookIds)
+    const workIds = Array.from(new Set((booksWorks||[]).map((b:any)=>b.work_id)))
+    const { data: worksRows } = await sb.from('works').select('id, source_id').in('id', workIds)
+    const sourceMap = new Map<string, string>((worksRows||[]).map((w:any)=>[w.id, w.source_id]))
+    const sourceIds = Array.from(new Set((worksRows||[]).map((w:any)=>w.source_id)))
+    const { data: srcRows } = await sb.from('sources').select('id, tradition_id').in('id', sourceIds)
+    const traditionsMap = new Map<string, string>((srcRows||[]).map((s:any)=>[s.id, s.tradition_id]))
+    const allowed = new Set<string>()
+    for (const b of (booksWorks||[])) {
+      const src = sourceMap.get(b.work_id)
+      const trad = src ? traditionsMap.get(src) : undefined
+      const okSource = sourceId ? (src === sourceId) : true
+      const okTrad = traditionId ? (trad === traditionId) : true
+      const okSourceMulti = Array.isArray(sourceIds) && sourceIds.length ? sourceIds.includes(String(src)) : true
+      const okTradMulti = Array.isArray(traditionIds) && traditionIds.length ? traditionIds.includes(String(trad)) : true
+      const okWorkMulti = Array.isArray(workIds) && workIds.length ? workIds.includes(String(b.work_id)) : true
+      if (okSource && okTrad && okSourceMulti && okTradMulti && okWorkMulti) allowed.add(b.id)
+    }
+    cards = cards.filter(c => c.chunk.book_id && allowed.has(c.chunk.book_id))
+  }
 
   cards.sort((a,b)=> (b.score ?? 0) - (a.score ?? 0))
   // Backfill: if fewer unique chunks than requested, pull more nearest chunks directly
@@ -240,10 +276,12 @@ export async function POST(req: NextRequest) {
     const { data: neighborChunks } = await sb.rpc('match_embedding_chunks', {
       query_embedding: qVec,
       match_count: Math.max(topK * 2, deficit * 5),
-      p_book_id: bookId ?? null,
-      p_work_id: null,
-      p_book_seq_min: (testament === 'new' ? 40 : (testament === 'old' ? 1 : (typeof bookSeqMin === 'number' ? bookSeqMin : null))),
-      p_book_seq_max: (testament === 'old' ? 39 : (testament === 'new' ? 66 : (typeof bookSeqMax === 'number' ? bookSeqMax : null))),
+      p_book_ids: Array.isArray(bookIds) && bookIds.length ? bookIds : (bookId ? [bookId] : null),
+      p_work_ids: Array.isArray(workIds) && workIds.length ? workIds : null,
+      p_source_ids: Array.isArray(sourceIds) && sourceIds.length ? sourceIds : null,
+      p_tradition_ids: Array.isArray(traditionIds) && traditionIds.length ? traditionIds : null,
+      p_book_seq_min: (typeof bookSeqMin === 'number' ? bookSeqMin : null),
+      p_book_seq_max: (typeof bookSeqMax === 'number' ? bookSeqMax : null),
     })
     const existingIds = new Set(cards.map(c => c.chunk.id))
     const toAdd = (neighborChunks || [])

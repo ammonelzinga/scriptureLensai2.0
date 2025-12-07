@@ -10,8 +10,14 @@ export async function POST(req: NextRequest) {
     query?: string
     topK?: number
     mode?: 'verses' | 'chapters'
+    traditionId?: string
+    sourceId?: string
     bookId?: string
     workId?: string
+    traditionIds?: string[]
+    sourceIds?: string[]
+    bookIds?: string[]
+    workIds?: string[]
     bookSeqMin?: number
     bookSeqMax?: number
     minSimilarity?: number
@@ -24,6 +30,12 @@ export async function POST(req: NextRequest) {
   const mode = body.mode ?? 'verses'
   const bookId = body.bookId
   const workId = body.workId
+  const traditionId = body.traditionId
+  const sourceId = body.sourceId
+  const bookIdsArr = Array.isArray(body.bookIds) ? body.bookIds.filter(Boolean) : []
+  const workIdsArr = Array.isArray(body.workIds) ? body.workIds.filter(Boolean) : []
+  const traditionIdsArr = Array.isArray(body.traditionIds) ? body.traditionIds.filter(Boolean) : []
+  const sourceIdsArr = Array.isArray(body.sourceIds) ? body.sourceIds.filter(Boolean) : []
   const bookSeqMin = body.bookSeqMin
   const bookSeqMax = body.bookSeqMax
   const minSimilarity = Math.max(0, Math.min(1, body.minSimilarity ?? 0.1))
@@ -42,8 +54,10 @@ export async function POST(req: NextRequest) {
       const { data: exact } = await sb.rpc('lexical_search_word_exact', {
         q: query,
         match_count: topK,
-        p_book_id: bookId ?? null,
-        p_work_id: workId ?? null,
+        p_book_ids: bookIdsArr.length ? bookIdsArr : null,
+        p_work_ids: workIdsArr.length ? workIdsArr : null,
+        p_source_ids: sourceIdsArr.length ? sourceIdsArr : null,
+        p_tradition_ids: traditionIdsArr.length ? traditionIdsArr : null,
         p_book_seq_min: bookSeqMin ?? null,
         p_book_seq_max: bookSeqMax ?? null,
       })
@@ -76,8 +90,10 @@ export async function POST(req: NextRequest) {
     const { data, error } = await sb.rpc('lexical_search_verses', {
       q: query,
       match_count: topK,
-      p_book_id: bookId ?? null,
-      p_work_id: workId ?? null,
+      p_book_ids: bookIdsArr.length ? bookIdsArr : null,
+      p_work_ids: workIdsArr.length ? workIdsArr : null,
+      p_source_ids: sourceIdsArr.length ? sourceIdsArr : null,
+      p_tradition_ids: traditionIdsArr.length ? traditionIdsArr : null,
       p_book_seq_min: bookSeqMin ?? null,
       p_book_seq_max: bookSeqMax ?? null,
     })
@@ -129,9 +145,42 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Optional book filter early
-      if (bookId && verses.length) {
-        verses = verses.filter((v: any) => v.book_id === bookId)
+      // Optional early filters
+      if (bookId && verses.length) verses = verses.filter((v: any) => v.book_id === bookId)
+      if (bookIdsArr.length && verses.length) verses = verses.filter((v:any)=> bookIdsArr.includes(v.book_id))
+      // Source/Tradition post-filter via joins
+      if ((sourceId || traditionId || sourceIdsArr.length || traditionIdsArr.length || workIdsArr.length) && verses.length) {
+        const bookIdsSet = new Set<string>(verses.map((v:any)=>v.book_id))
+        const bookIdsArr = Array.from(bookIdsSet)
+        const { data: worksByBooks } = await sb.from('books').select('id, work_id').in('id', bookIdsArr)
+        const workIds = Array.from(new Set((worksByBooks||[]).map((b:any)=>b.work_id)))
+        let sourcesByWorks:any[] = []
+        if (workIds.length) {
+          const { data: worksRows } = await sb.from('works').select('id, source_id').in('id', workIds)
+          sourcesByWorks = worksRows || []
+        }
+        const sourceMap = new Map<string, string>((sourcesByWorks||[]).map((w:any)=>[w.id, w.source_id]))
+        let traditionsMap = new Map<string, string>()
+        if (sourceId || traditionId || sourceIdsArr.length || traditionIdsArr.length) {
+          const sourceIds = Array.from(new Set((sourcesByWorks||[]).map((w:any)=>w.source_id)))
+          if (sourceIds.length) {
+            const { data: srcRows } = await sb.from('sources').select('id, tradition_id').in('id', sourceIds)
+            traditionsMap = new Map<string, string>((srcRows||[]).map((s:any)=>[s.id, s.tradition_id]))
+          }
+        }
+        // Filter
+        const allowedBookIds = new Set<string>()
+        for (const b of (worksByBooks||[])) {
+          const src = sourceMap.get(b.work_id)
+          const trad = src ? traditionsMap.get(src) : undefined
+          const okSourceSingle = sourceId ? (src === sourceId) : true
+          const okTradSingle = traditionId ? (trad === traditionId) : true
+          const okSourceMulti = sourceIdsArr.length ? sourceIdsArr.includes(String(src)) : true
+          const okTradMulti = traditionIdsArr.length ? traditionIdsArr.includes(String(trad)) : true
+          const okWorkMulti = workIdsArr.length ? workIdsArr.includes(String(b.work_id)) : true
+          if (okSourceSingle && okTradSingle && okSourceMulti && okTradMulti && okWorkMulti) allowedBookIds.add(b.id)
+        }
+        verses = verses.filter((v:any)=> allowedBookIds.has(v.book_id))
       }
 
       // Enrich verses with chapter + book info for reference formatting
@@ -230,6 +279,7 @@ export async function POST(req: NextRequest) {
     })
     // Note: filtering now happens inside RPC; the below filter is redundant but harmless
     if (bookId) enriched = enriched.filter((r) => r.book_id === bookId)
+    if (bookIdsArr.length) enriched = enriched.filter((r)=> bookIdsArr.includes(r.book_id))
     // If nothing passes the threshold, return the topK without filtering to avoid empty results
     const filtered = enriched.filter((r) => (r.similarity ?? 0) >= minSimilarity)
     enriched = filtered.length ? filtered : enriched.slice(0, topK)
@@ -300,10 +350,50 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Post-filter chapters by source/tradition if provided
+    if ((sourceId || traditionId) && chapters.length) {
+      const bookIds = Array.from(new Set(chapters.map((c:any)=>c.book_id)))
+      const { data: booksWorks } = await sb.from('books').select('id, work_id').in('id', bookIds)
+      const workIds = Array.from(new Set((booksWorks||[]).map((b:any)=>b.work_id)))
+      const { data: worksRows } = await sb.from('works').select('id, source_id').in('id', workIds)
+      const sourceMap = new Map<string, string>((worksRows||[]).map((w:any)=>[w.id, w.source_id]))
+      const sourceIds = Array.from(new Set((worksRows||[]).map((w:any)=>w.source_id)))
+      const { data: srcRows } = await sb.from('sources').select('id, tradition_id').in('id', sourceIds)
+      const traditionsMap = new Map<string, string>((srcRows||[]).map((s:any)=>[s.id, s.tradition_id]))
+      const allowedBookIds = new Set<string>()
+      for (const b of (booksWorks||[])) {
+        const src = sourceMap.get(b.work_id)
+        const trad = src ? traditionsMap.get(src) : undefined
+        const okSource = sourceId ? (src === sourceId) : true
+        const okTrad = traditionId ? (trad === traditionId) : true
+        if (okSource && okTrad) allowedBookIds.add(b.id)
+      }
+      chapters = chapters.filter((c:any)=> allowedBookIds.has(c.book_id))
+    }
     return NextResponse.json({ results: chapters, mode })
   }
 
   if (bookId) chaptersRes = chaptersRes.filter((r: any) => r.book_id === bookId)
+  // Post-filter chaptersRes by source/tradition if provided
+  if (sourceId || traditionId) {
+    const bookIds = Array.from(new Set(chaptersRes.map((c:any)=>c.book_id)))
+    const { data: booksWorks } = await sb.from('books').select('id, work_id').in('id', bookIds)
+    const workIds = Array.from(new Set((booksWorks||[]).map((b:any)=>b.work_id)))
+    const { data: worksRows } = await sb.from('works').select('id, source_id').in('id', workIds)
+    const sourceMap = new Map<string, string>((worksRows||[]).map((w:any)=>[w.id, w.source_id]))
+    const sourceIds = Array.from(new Set((worksRows||[]).map((w:any)=>w.source_id)))
+    const { data: srcRows } = await sb.from('sources').select('id, tradition_id').in('id', sourceIds)
+    const traditionsMap = new Map<string, string>((srcRows||[]).map((s:any)=>[s.id, s.tradition_id]))
+    const allowedBookIds = new Set<string>()
+    for (const b of (booksWorks||[])) {
+      const src = sourceMap.get(b.work_id)
+      const trad = src ? traditionsMap.get(src) : undefined
+      const okSource = sourceId ? (src === sourceId) : true
+      const okTrad = traditionId ? (trad === traditionId) : true
+      if (okSource && okTrad) allowedBookIds.add(b.id)
+    }
+    chaptersRes = chaptersRes.filter((c:any)=> allowedBookIds.has(c.book_id))
+  }
   // Apply threshold with fallback to topK
   const chFiltered = chaptersRes.filter((r: any) => (r.similarity ?? 0) >= minSimilarity)
   chaptersRes = chFiltered.length ? chFiltered : (chaptersRes as any[]).slice(0, topK)

@@ -3,11 +3,11 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)
-  const sourceId = url.searchParams.get('sourceId')
+  const traditionId = url.searchParams.get('traditionId')
   const sb = supabaseAdmin()
-  let q = sb.from('works').select('id, name, abbrev, source_id')
-  if (sourceId) q = q.eq('source_id', sourceId)
+  let q = sb.from('sources').select('id, name, tradition_id').order('name')
+  if (traditionId) q = q.eq('tradition_id', traditionId)
   const { data, error } = await q
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ works: data || [] })
+  return NextResponse.json({ sources: data || [] })
 }
