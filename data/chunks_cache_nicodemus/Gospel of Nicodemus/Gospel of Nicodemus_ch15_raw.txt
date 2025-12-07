@@ -1,0 +1,59 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [15, 15, 15],
+      "verse_numbers": [1, 2, 3],
+      "combined_text": "concerning the expected arrival of Christ in hell. WHILE all the saints were rejoicing, behold Satan, the prince and captain of death, said to the prince of hell, Prepare to receive Jesus of Nazareth himself, who boasted that he was the Son of God, and yet was a man afraid of death, and said, My soul is sorrowful even to death. Besides he did many injuries to me and to many others; for those whom I made blind and lame and those also whom I tormented with several devils, he cured by his word; yea, and those whom I brought dead to thee, he by force takes away from thee.",
+      "verses": [
+        {"chapter": 15, "verse": 1},
+        {"chapter": 15, "verse": 2},
+        {"chapter": 15, "verse": 3}
+      ]
+    },
+    {
+      "chapter_numbers": [15, 15, 15, 15, 15],
+      "verse_numbers": [4, 5, 6, 7, 8],
+      "combined_text": "To this the prince of hell replied to Satan, Who is that so powerful prince, and yet a man who is afraid of death? For all the potentates of the earth are subject to my power, whom thou broughtest to subjection by thy power. But if he be so powerful in his human nature, I affirm to thee for truth, that he is almighty in his divine nature, and no man can resist his power: When therefore he said he was afraid of death, he designed to ensnare thee, and unhappy it will be to thee for everlasting ages, Then Satan replying, said to the prince of hell, Why didst thou express a doubt, and wast afraid to receive that Jesus of Nazareth, both thy adversary and mine?",
+      "verses": [
+        {"chapter": 15, "verse": 4},
+        {"chapter": 15, "verse": 5},
+        {"chapter": 15, "verse": 6},
+        {"chapter": 15, "verse": 7},
+        {"chapter": 15, "verse": 8}
+      ]
+    },
+    {
+      "chapter_numbers": [15, 15, 15, 15],
+      "verse_numbers": [9, 10, 11, 12],
+      "combined_text": "As for me, I tempted him and stirred up my old people the Jews with zeal and anger against him; I sharpened the spear for his suffering; I mixed the gall and vinegar, and commanded that he should drink it; I prepared the cross to crucify him, and the nails to pierce through his hands and feet; and now his death is near at hand, I will bring him hither, subject both to thee and me. Then the prince of hell answering, said, Thou saidst to me just now, that he took away the dead from me by force. They who have been kept here till they should live again upon earth, were taken away hence, not by their own power, but by prayers made to God, and their almighty God took them from me.",
+      "verses": [
+        {"chapter": 15, "verse": 9},
+        {"chapter": 15, "verse": 10},
+        {"chapter": 15, "verse": 11},
+        {"chapter": 15, "verse": 12}
+      ]
+    },
+    {
+      "chapter_numbers": [15, 15, 15, 15, 15],
+      "verse_numbers": [13, 14, 15, 16, 17],
+      "combined_text": "Who then is that Jesus of Nazareth that by his word hath taken away the dead from me without prayer to God? Perhaps it is the same who took away from me Lazarus, after he had been four days dead, and did both stink and was rotten, and of whom I had possession as a dead person, yet he brought him to life again by his power. Satan answering, replied to the prince of hell, It is the very same person, Jesus of Nazareth. Which when the prince of hell heard, he said to him, I adjure thee by the powers which belong to thee and me, that thou bring him not to me. For when I heard of the power of his word, I trembled for fear, and all my impious company were at the same disturbed;",
+      "verses": [
+        {"chapter": 15, "verse": 13},
+        {"chapter": 15, "verse": 14},
+        {"chapter": 15, "verse": 15},
+        {"chapter": 15, "verse": 16},
+        {"chapter": 15, "verse": 17}
+      ]
+    },
+    {
+      "chapter_numbers": [15, 15, 15],
+      "verse_numbers": [18, 19, 20],
+      "combined_text": "And we were not able to detain Lazarus, but he gave himself a shake, and with all the signs of malice he immediately went away from us; and the very earth, in which the dead body of Lazarus was lodged, presently turned him out alive. And I know now that he is Almighty God who could perform such things, who is mighty in his dominion, and mighty in his human nature, who is the Saviour of mankind. Bring not therefore this person hither, for he will set at liberty all those whom I hold in prison under unbelief, and bound with the fetters of their sins, and will conduct them to everlasting life.",
+      "verses": [
+        {"chapter": 15, "verse": 18},
+        {"chapter": 15, "verse": 19},
+        {"chapter": 15, "verse": 20}
+      ]
+    }
+  ]
+}

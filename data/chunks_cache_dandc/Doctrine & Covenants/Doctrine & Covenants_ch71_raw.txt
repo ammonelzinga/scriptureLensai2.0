@@ -1,0 +1,29 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [71,71,71,71],
+      "verse_numbers": [1,2,3,4],
+      "combined_text": "Behold, thus saith the Lord unto you my servants Joseph Smith, Jun., and Sidney Rigdon, that the time has verily come that it is necessary and expedient in me that you should open your mouths in proclaiming my gospel, the things of the kingdom, expounding the mysteries thereof out of the scriptures, according to that portion of Spirit and power which shall be given unto you, even as I will. Verily I say unto you, proclaim unto the world in the regions round about, and in the church also, for the space of a season, even until it shall be made known unto you. Verily this is a mission for a season, which I give unto you. Wherefore, labor ye in my vineyard. Call upon the inhabitants of the earth, and bear record, and prepare the way for the commandments and revelations which are to come.",
+      "verses": [
+        {"chapter":71,"verse":1},
+        {"chapter":71,"verse":2},
+        {"chapter":71,"verse":3},
+        {"chapter":71,"verse":4}
+      ]
+    },
+    {
+      "chapter_numbers": [71,71,71,71,71,71,71],
+      "verse_numbers": [5,6,7,8,9,10,11],
+      "combined_text": "Now, behold this is wisdom; whoso readeth, let him understand and receive also; For unto him that receiveth it shall be given more abundantly, even power. Wherefore, confound your enemies; call upon them to meet you both in public and in private; and inasmuch as ye are faithful their shame shall be made manifest. Wherefore, let them bring forth their strong reasons against the Lord. Verily, thus saith the Lord unto you—there is no weapon that is formed against you shall prosper; And if any man lift his voice against you he shall be confounded in mine own due time. Wherefore, keep my commandments; they are true and faithful. Even so. Amen.",
+      "verses": [
+        {"chapter":71,"verse":5},
+        {"chapter":71,"verse":6},
+        {"chapter":71,"verse":7},
+        {"chapter":71,"verse":8},
+        {"chapter":71,"verse":9},
+        {"chapter":71,"verse":10},
+        {"chapter":71,"verse":11}
+      ]
+    }
+  ]
+}

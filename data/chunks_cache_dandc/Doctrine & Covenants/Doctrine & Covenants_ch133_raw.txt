@@ -1,0 +1,134 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [133, 133, 133, 133, 133, 133, 133, 133, 133, 133],
+      "verse_numbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "combined_text": "Hearken, O ye people of my church, saith the Lord your God, and hear the word of the Lord concerning you— The Lord who shall suddenly come to his temple; the Lord who shall come down upon the world with a curse to judgment; yea, upon all the nations that forget God, and upon all the ungodly among you. For he shall make bare his holy arm in the eyes of all the nations, and all the ends of the earth shall see the salvation of their God. Wherefore, prepare ye, prepare ye, O my people; sanctify yourselves; gather ye together, O ye people of my church, upon the land of Zion, all you that have not been commanded to tarry. Go ye out from Babylon. Be ye clean that bear the vessels of the Lord. Call your solemn assemblies, and speak often one to another. And let every man call upon the name of the Lord. Yea, verily I say unto you again, the time has come when the voice of the Lord is unto you: Go ye out of Babylon; gather ye out from among the nations, from the four winds, from one end of heaven to the other. Send forth the elders of my church unto the nations which are afar off; unto the islands of the sea; send forth unto foreign lands; call upon all nations, first upon the Gentiles, and then upon the Jews. And behold, and lo, this shall be their cry, and the voice of the Lord unto all people: Go ye forth unto the land of Zion, that the borders of my people may be enlarged, and that her stakes may be strengthened, and that Zion may go forth unto the regions round about. Yea, let the cry go forth among all people: Awake and arise and go forth to meet the Bridegroom; behold and lo, the Bridegroom cometh; go ye out to meet him. Prepare yourselves for the great day of the Lord.",
+      "verses": [
+        {"chapter": 133, "verse": 1},
+        {"chapter": 133, "verse": 2},
+        {"chapter": 133, "verse": 3},
+        {"chapter": 133, "verse": 4},
+        {"chapter": 133, "verse": 5},
+        {"chapter": 133, "verse": 6},
+        {"chapter": 133, "verse": 7},
+        {"chapter": 133, "verse": 8},
+        {"chapter": 133, "verse": 9},
+        {"chapter": 133, "verse": 10}
+      ]
+    },
+    {
+      "chapter_numbers": [133, 133, 133, 133, 133, 133, 133, 133, 133, 133],
+      "verse_numbers": [11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+      "combined_text": "Watch, therefore, for ye know neither the day nor the hour. Let them, therefore, who are among the Gentiles flee unto Zion. And let them who be of Judah flee unto Jerusalem, unto the mountains of the Lord's house. Go ye out from among the nations, even from Babylon, from the midst of wickedness, which is spiritual Babylon. But verily, thus saith the Lord, let not your flight be in haste, but let all things be prepared before you; and he that goeth, let him not look back lest sudden destruction shall come upon him. Hearken and hear, O ye inhabitants of the earth. Listen, ye elders of my church together, and hear the voice of the Lord; for he calleth upon all men, and he commandeth all men everywhere to repent. For behold, the Lord God hath sent forth the angel crying through the midst of heaven, saying: Prepare ye the way of the Lord, and make his paths straight, for the hour of his coming is nigh— When the Lamb shall stand upon Mount Zion, and with him a hundred and forty-four thousand, having his Father's name written on their foreheads. Wherefore, prepare ye for the coming of the Bridegroom; go ye, go ye out to meet him. For behold, he shall stand upon the mount of Olivet, and upon the mighty ocean, even the great deep, and upon the islands of the sea, and upon the land of Zion.",
+      "verses": [
+        {"chapter": 133, "verse": 11},
+        {"chapter": 133, "verse": 12},
+        {"chapter": 133, "verse": 13},
+        {"chapter": 133, "verse": 14},
+        {"chapter": 133, "verse": 15},
+        {"chapter": 133, "verse": 16},
+        {"chapter": 133, "verse": 17},
+        {"chapter": 133, "verse": 18},
+        {"chapter": 133, "verse": 19},
+        {"chapter": 133, "verse": 20}
+      ]
+    },
+    {
+      "chapter_numbers": [133, 133, 133, 133, 133, 133, 133, 133, 133, 133],
+      "verse_numbers": [21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+      "combined_text": "And he shall utter his voice out of Zion, and he shall speak from Jerusalem, and his voice shall be heard among all people; And it shall be a voice as the voice of many waters, and as the voice of a great thunder, which shall break down the mountains, and the valleys shall not be found. He shall command the great deep, and it shall be driven back into the north countries, and the islands shall become one land; And the land of Jerusalem and the land of Zion shall be turned back into their own place, and the earth shall be like as it was in the days before it was divided. And the Lord, even the Savior, shall stand in the midst of his people, and shall reign over all flesh. And they who are in the north countries shall come in remembrance before the Lord; and their prophets shall hear his voice, and shall no longer stay themselves; and they shall smite the rocks, and the ice shall flow down at their presence. And an highway shall be cast up in the midst of the great deep. Their enemies shall become a prey unto them, And in the barren deserts there shall come forth pools of living water; and the parched ground shall no longer be a thirsty land. And they shall bring forth their rich treasures unto the children of Ephraim, my servants.",
+      "verses": [
+        {"chapter": 133, "verse": 21},
+        {"chapter": 133, "verse": 22},
+        {"chapter": 133, "verse": 23},
+        {"chapter": 133, "verse": 24},
+        {"chapter": 133, "verse": 25},
+        {"chapter": 133, "verse": 26},
+        {"chapter": 133, "verse": 27},
+        {"chapter": 133, "verse": 28},
+        {"chapter": 133, "verse": 29},
+        {"chapter": 133, "verse": 30}
+      ]
+    },
+    {
+      "chapter_numbers": [133, 133, 133, 133, 133, 133, 133, 133, 133, 133],
+      "verse_numbers": [31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
+      "combined_text": "And the boundaries of the everlasting hills shall tremble at their presence. And there shall they fall down and be crowned with glory, even in Zion, by the hands of the servants of the Lord, even the children of Ephraim. And they shall be filled with songs of everlasting joy. Behold, this is the blessing of the everlasting God upon the tribes of Israel, and the richer blessing upon the head of Ephraim and his fellows. And they also of the tribe of Judah, after their pain, shall be sanctified in holiness before the Lord, to dwell in his presence day and night, forever and ever. And now, verily saith the Lord, that these things might be known among you, O inhabitants of the earth, I have sent forth mine angel flying through the midst of heaven, having the everlasting gospel, who hath appeared unto some and hath committed it unto man, who shall appear unto many that dwell on the earth. And this gospel shall be preached unto every nation, and kindred, and tongue, and people. And the servants of God shall go forth, saying with a loud voice: Fear God and give glory to him, for the hour of his judgment is come; And worship him that made heaven, and earth, and the sea, and the fountains of waters— Calling upon the name of the Lord day and night, saying: O that thou wouldst rend the heavens, that thou wouldst come down, that the mountains might flow down at thy presence.",
+      "verses": [
+        {"chapter": 133, "verse": 31},
+        {"chapter": 133, "verse": 32},
+        {"chapter": 133, "verse": 33},
+        {"chapter": 133, "verse": 34},
+        {"chapter": 133, "verse": 35},
+        {"chapter": 133, "verse": 36},
+        {"chapter": 133, "verse": 37},
+        {"chapter": 133, "verse": 38},
+        {"chapter": 133, "verse": 39},
+        {"chapter": 133, "verse": 40}
+      ]
+    },
+    {
+      "chapter_numbers": [133, 133, 133, 133, 133, 133, 133, 133, 133, 133],
+      "verse_numbers": [41, 42, 43, 44, 45, 46, 47, 48, 49, 50],
+      "combined_text": "And it shall be answered upon their heads; for the presence of the Lord shall be as the melting fire that burneth, and as the fire which causeth the waters to boil. O Lord, thou shalt come down to make thy name known to thine adversaries, and all nations shall tremble at thy presence— When thou doest terrible things, things they look not for; Yea, when thou comest down, and the mountains flow down at thy presence, thou shalt meet him who rejoiceth and worketh righteousness, who remembereth thee in thy ways. For since the beginning of the world have not men heard nor perceived by the ear, neither hath any eye seen, O God, besides thee, how great things thou hast prepared for him that waiteth for thee. And it shall be said: Who is this that cometh down from God in heaven with dyed garments; yea, from the regions which are not known, clothed in his glorious apparel, traveling in the greatness of his strength? And he shall say: I am he who spake in righteousness, mighty to save. And the Lord shall be red in his apparel, and his garments like him that treadeth in the wine-vat. And so great shall be the glory of his presence that the sun shall hide his face in shame, and the moon shall withhold its light, and the stars shall be hurled from their places. And his voice shall be heard: I have trodden the wine-press alone, and have brought judgment upon all people; and none were with me;",
+      "verses": [
+        {"chapter": 133, "verse": 41},
+        {"chapter": 133, "verse": 42},
+        {"chapter": 133, "verse": 43},
+        {"chapter": 133, "verse": 44},
+        {"chapter": 133, "verse": 45},
+        {"chapter": 133, "verse": 46},
+        {"chapter": 133, "verse": 47},
+        {"chapter": 133, "verse": 48},
+        {"chapter": 133, "verse": 49},
+        {"chapter": 133, "verse": 50}
+      ]
+    },
+    {
+      "chapter_numbers": [133, 133, 133, 133, 133, 133, 133, 133, 133, 133],
+      "verse_numbers": [51, 52, 53, 54, 55, 56, 57, 58, 59, 60],
+      "combined_text": "And I have trampled them in my fury, and I did tread upon them in mine anger, and their blood have I sprinkled upon my garments, and stained all my raiment; for this was the day of vengeance which was in my heart. And now the year of my redeemed is come; and they shall mention the loving kindness of their Lord, and all that he has bestowed upon them according to his goodness, and according to his loving kindness, forever and ever. In all their afflictions he was afflicted. And the angel of his presence saved them; and in his love, and in his pity, he redeemed them, and bore them, and carried them all the days of old; Yea, and Enoch also, and they who were with him; the prophets who were before him; and Noah also, and they who were before him; and Moses also, and they who were before him; And from Moses to Elijah, and from Elijah to John, who were with Christ in his resurrection, and the holy apostles, with Abraham, Isaac, and Jacob, shall be in the presence of the Lamb. And the graves of the saints shall be opened; and they shall come forth and stand on the right hand of the Lamb, when he shall stand upon Mount Zion, and upon the holy city, the New Jerusalem; and they shall sing the song of the Lamb, day and night forever and ever. And for this cause, that men might be made partakers of the glories which were to be revealed, the Lord sent forth the fulness of his gospel, his everlasting covenant, reasoning in plainness and simplicity— To prepare the weak for those things which are coming on the earth, and for the Lord's errand in the day when the weak shall confound the wise, and the little one become a strong nation, and two shall put their tens of thousands to flight. And by the weak things of the earth the Lord shall thresh the nations by the power of his Spirit. And for this cause these commandments were given; they were commanded to be kept from the world in the day that they were given, but now are to go forth unto all flesh—",
+      "verses": [
+        {"chapter": 133, "verse": 51},
+        {"chapter": 133, "verse": 52},
+        {"chapter": 133, "verse": 53},
+        {"chapter": 133, "verse": 54},
+        {"chapter": 133, "verse": 55},
+        {"chapter": 133, "verse": 56},
+        {"chapter": 133, "verse": 57},
+        {"chapter": 133, "verse": 58},
+        {"chapter": 133, "verse": 59},
+        {"chapter": 133, "verse": 60}
+      ]
+    },
+    {
+      "chapter_numbers": [133, 133, 133, 133, 133, 133, 133, 133, 133, 133],
+      "verse_numbers": [61, 62, 63, 64, 65, 66, 67, 68, 69, 70],
+      "combined_text": "And this according to the mind and will of the Lord, who ruleth over all flesh. And unto him that repenteth and sanctifieth himself before the Lord shall be given eternal life. And upon them that hearken not to the voice of the Lord shall be fulfilled that which was written by the prophet Moses, that they should be cut off from among the people. And also that which was written by the prophet Malachi: For, behold, the day cometh that shall burn as an oven, and all the proud, yea, and all that do wickedly, shall be stubble; and the day that cometh shall burn them up, saith the Lord of hosts, that it shall leave them neither root nor branch. Wherefore, this shall be the answer of the Lord unto them: In that day when I came unto mine own, no man among you received me, and you were driven out. When I called again there was none of you to answer; yet my arm was not shortened at all that I could not redeem, neither my power to deliver. Behold, at my rebuke I dry up the sea. I make the rivers a wilderness; their fish stink, and die for thirst. I clothe the heavens with blackness, and make sackcloth their covering. And this shall ye have of my hand—ye shall lie down in sorrow.",
+      "verses": [
+        {"chapter": 133, "verse": 61},
+        {"chapter": 133, "verse": 62},
+        {"chapter": 133, "verse": 63},
+        {"chapter": 133, "verse": 64},
+        {"chapter": 133, "verse": 65},
+        {"chapter": 133, "verse": 66},
+        {"chapter": 133, "verse": 67},
+        {"chapter": 133, "verse": 68},
+        {"chapter": 133, "verse": 69},
+        {"chapter": 133, "verse": 70}
+      ]
+    },
+    {
+      "chapter_numbers": [133, 133, 133, 133],
+      "verse_numbers": [71, 72, 73, 74],
+      "combined_text": "Behold, and lo, there are none to deliver you; for ye obeyed not my voice when I called to you out of the heavens; ye believed not my servants, and when they were sent unto you ye received them not. Wherefore, they sealed up the testimony and bound up the law, and ye were delivered over unto darkness. These shall go away into outer darkness, where there is weeping, and wailing, and gnashing of teeth. Behold the Lord your God hath spoken it. Amen.",
+      "verses": [
+        {"chapter": 133, "verse": 71},
+        {"chapter": 133, "verse": 72},
+        {"chapter": 133, "verse": 73},
+        {"chapter": 133, "verse": 74}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [40, 40, 40],
+      "verse_numbers": [1, 2, 3],
+      "combined_text": "Behold, verily I say unto you, that the heart of my servant James Covel was right before me, for he covenanted with me that he would obey my word. And he received the word with gladness, but straightway Satan tempted him; and the fear of persecution and the cares of the world caused him to reject the word. Wherefore he broke my covenant, and it remaineth with me to do with him as seemeth me good. Amen.",
+      "verses": [
+        {"chapter": 40, "verse": 1},
+        {"chapter": 40, "verse": 2},
+        {"chapter": 40, "verse": 3}
+      ]
+    }
+  ]
+}

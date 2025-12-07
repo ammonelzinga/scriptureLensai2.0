@@ -1,0 +1,117 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [4,4,4,4,4,4,4,4,4,4],
+      "verse_numbers": [1,2,3,4,5,6,7,8,9,10],
+      "combined_text": "THEN Pilate left Jesus in the hall, and went out to the Jews, and said, I find not any one fault in Jesus. The Jews say unto him, But he said, I can destroy the temple of God, and in three days build it up again. Pilate saith to them, What sort of temple is that of which he speaketh? The Jews say unto him, That which Solomon was forty-six years in building, he said he would destroy, and in three days build up. Pilate said to them again, I am innocent from the blood of that man! do ye look to it. The Jews say to him, His blood be upon us and our children. Then Pilate calling together the elders and scribes, priests and Levites, saith to them privately, Do not act thus; I have found nothing in your charge (against him) concerning his curing sick persons, and breaking the sabbath, worthy of death. The priests and Levites replied to Pilate, By the life of Caesar, if any one be a blasphemer, he is worthy of death; but this man hath blasphemed against the Lord. Then the governor again commanded the Jews to depart out of the hall; and calling Jesus, said to him, What shall I do with thee? Jesus answered him, Do according as it is written. Pilate said to him, How is it written?",
+      "verses": [
+        {"chapter": 4, "verse": 1},
+        {"chapter": 4, "verse": 2},
+        {"chapter": 4, "verse": 3},
+        {"chapter": 4, "verse": 4},
+        {"chapter": 4, "verse": 5},
+        {"chapter": 4, "verse": 6},
+        {"chapter": 4, "verse": 7},
+        {"chapter": 4, "verse": 8},
+        {"chapter": 4, "verse": 9},
+        {"chapter": 4, "verse": 10}
+      ]
+    },
+    {
+      "chapter_numbers": [4,4,4,4,4,4,4,4,4,4],
+      "verse_numbers": [11,12,13,14,15,16,17,18,19,20],
+      "combined_text": "Jesus saith to him, Moses and the prophets have prophesied concerning my suffering and resurrection. The Jews hearing this, were provoked, and said to Pilate, Why wilt thou any longer hear the blasphemy of that man? Pilate saith to them, If these words seem to you blasphemy, do ye take him, bring him to your court, and try him according to your law. The Jews reply to Pilate, Our law saith, he shall be obliged to receive nine and thirty stripes, but if after this manner he shall blaspheme against the Lord, he shall be stoned. Pilate saith unto them, If that speech of his was blasphemy, do ye try him according to your law. The Jews say to Pilate, Our law command us not to put any one to death. We desire that he may be crucified, because he deserves the death of the cross. Pilate saith to them, It is not fit he should be crucified: let him be only whipped and sent away. But when the governor looked upon the people that were present and the Jews, he saw many of the Jews in tears, and said to the chief priests of the Jews, All the people do not desire his death. The elders of the Jews answered to Pilate, We and all the people came hither for this very purpose, that he should die. Pilate saith to them, Why should he die?",
+      "verses": [
+        {"chapter": 4, "verse": 11},
+        {"chapter": 4, "verse": 12},
+        {"chapter": 4, "verse": 13},
+        {"chapter": 4, "verse": 14},
+        {"chapter": 4, "verse": 15},
+        {"chapter": 4, "verse": 16},
+        {"chapter": 4, "verse": 17},
+        {"chapter": 4, "verse": 18},
+        {"chapter": 4, "verse": 19},
+        {"chapter": 4, "verse": 20}
+      ]
+    },
+    {
+      "chapter_numbers": [4,4,4,4,4,4,4,4,4,4],
+      "verse_numbers": [21,2,3,4,5,6,7,8,9,10],
+      "combined_text": "They said to him, Because he declares himself to be the Son of God and a King. CHAP. V. and relates his miracles. testify of other miracles. BUT Nicodemus, a certain Jew, stood before the governor, and said, I entreat thee, O righteous judge, that thou wouldst favour me with the liberty of speaking a few words. Pilate said to him, Speak on. Nicodemus said, I spake to the elders of the Jews, and the scribes, and priests and Levites, and all the multitude of the Jews, in their assembly; What is it ye would do with this man? He is a man who hath wrought many useful and glorious miracles, such as no man on earth ever wrought before, nor will ever work. Let him go, and do him no harm; if he cometh from God, his miracles, (his miraculous cures) will continue; but if from men, they will come to nought. Thus Moses, when he was sent by God into Egypt, wrought the miracles which God commanded him, before Pharaoh king of Egypt; and though the magicians of that country, Jannes and Jambres, wrought by their magic the same miracles which Moses did, yet they could not work all which he did; And the miracles which the magicians wrought, were not of God, as ye know, O Scribes and Pharisees; but they who wrought them perished, and all who believed them. And now let this man go; because the very miracles for which ye accuse him, are from God; and he is not worthy of death. The Jews then said to Nicodemus, Art thou become his disciple, and making speeches in his favour? Nicodemus said to them, Is the governor become his disciple also, and does he make speeches for him? Did not Caesar place him in that high post?",
+      "verses": [
+        {"chapter": 4, "verse": 21},
+        {"chapter": 4, "verse": 2},
+        {"chapter": 4, "verse": 3},
+        {"chapter": 4, "verse": 4},
+        {"chapter": 4, "verse": 5},
+        {"chapter": 4, "verse": 6},
+        {"chapter": 4, "verse": 7},
+        {"chapter": 4, "verse": 8},
+        {"chapter": 4, "verse": 9},
+        {"chapter": 4, "verse": 10}
+      ]
+    },
+    {
+      "chapter_numbers": [4,4,4,4,4,4,4,4,4,4],
+      "verse_numbers": [11,12,13,14,15,16,17,18,19,20],
+      "combined_text": "When the Jews heard this they trembled, and gnashed their teeth at Nicodemus, and said to him, Mayest thou receive his doctrine for truth, and have thy lot with Christ! Nicodemus replied, Amen; I will receive his doctrine, and my lot with him, as ye have said. Then another certain Jew rose up, and desired leave of the governor to hear him a few words. And the governor said, Speak, what thou hast a mind. And he said, I lay for thirty- eight years by the sheep-pool at Jerusalem, labouring under a great infirmity, and waiting for a cure which should be wrought by the coming of an angel, who at a certain time troubled the water: and whosoever first after the troubling of the water stepped in, was made whole of whatsoever disease he had. And when Jesus saw me languishing there, he said to me, Wilt thou be made whole? And I answered, Sir, I have no man, when the water is troubled, to put me into the pool. And he said unto me, Rise, take up thy bed and walk. And I was immediately made whole, and took up my bed and walked. The Jews then said to Pilate, Our Lord Governor, pray ask him what day it was on which he was cured of his infirmity.",
+      "verses": [
+        {"chapter": 4, "verse": 11},
+        {"chapter": 4, "verse": 12},
+        {"chapter": 4, "verse": 13},
+        {"chapter": 4, "verse": 14},
+        {"chapter": 4, "verse": 15},
+        {"chapter": 4, "verse": 16},
+        {"chapter": 4, "verse": 17},
+        {"chapter": 4, "verse": 18},
+        {"chapter": 4, "verse": 19},
+        {"chapter": 4, "verse": 20}
+      ]
+    },
+    {
+      "chapter_numbers": [4,4,4,4,4,4,4,4,4,4],
+      "verse_numbers": [21,22,23,24,25,26,27,28,29,32],
+      "combined_text": "They told me that Jesus was passing by: then I cried out, saying, Jesus, Son of David, have mercy on me. And he stood still, and commanded that I should be brought to him, and said to me, What wilt thou? I said, Lord, that I may receive my sight. He said to me, Receive thy sight: and presently I saw, and followed him, rejoicing and giving thanks, Another Jew also came forth, and said, I was a leper, and he cured me by his word only, saying, I will, be thou clean; and presently I was cleansed from my leprosy. And another Jew came forth, and said I was crooked, and he made me straight by his word. And a certain woman named Veronica, said, I was afflicted with an issue of blood twelve years, and I touched the hem of his garment, and presently the issue of blood stopped. The Jews then said, We have a law, that a woman shall not be allowed as an evidence. And, after other things, another Jew said, I saw Jesus invited to a wedding with his disciples, and there was a want of wine in Cana of Galilee; And when the wine was all drank, he commanded the servants that they should fill six pots which were there with water, and they filled them up to the brim, and he blessed them and turned the water into wine, and all the people drank, being surprised at this miracle, and said, I saw Jesus teaching in the synagogue at Capernaum; and there was in the synagogue a certain man who had a devil; and he cried out, saying, let me alone; what have we to do with thee, Jesus of Nazareth? Art thou come to destroy us? I know that thou art the Holy One of God. Hold thy peace, unclean spirit, and come out of the man; and presently he came out of him, and did not at all hurt him. The following things were also said by a Pharisee: I saw that a great company came to Jesus from Galilee and Judea, and the sea-cost, and many countries about Jordan; and many infirm persons came to him, and he healed them all.",
+      "verses": [
+        {"chapter": 4, "verse": 21},
+        {"chapter": 4, "verse": 22},
+        {"chapter": 4, "verse": 23},
+        {"chapter": 4, "verse": 24},
+        {"chapter": 4, "verse": 25},
+        {"chapter": 4, "verse": 26},
+        {"chapter": 4, "verse": 27},
+        {"chapter": 4, "verse": 28},
+        {"chapter": 4, "verse": 29},
+        {"chapter": 4, "verse": 32}
+      ]
+    },
+    {
+      "chapter_numbers": [4,4,4,4,4,4,4,4,4,4],
+      "verse_numbers": [33,34,35,36,37,38,39,40,41,42],
+      "combined_text": "And I heard the unclean spirits crying out, and saying, Thou art the Son of God. And Jesus strictly charged them, that they should not make him known. After this another person, whose name was Centurio, said, I saw Jesus in Capernaum, and I entreated him, saying, Lord, my servant lieth at home sick of the palsy. And Jesus said to me, I will come and cure him. But I said, Lord, I am not worthy that thou shouldst come under my roof; but only speak the word, and my servant shall be healed. And Jesus said unto me, Go thy way; and as thou hast believed so be it done unto thee. And my servant was healed from that same hour. Then a certain nobleman said, I had a son in Capernaum, who lay at the point of death; and when I heard that Jesus was come into Galilee, I went and besought him that he would come down to my house, and heal my son, for he was at the point of death. He said to me, Go thy way, thy son liveth. And my son was cured from that hour. Besides these, also many others of the Jews, both men and Women, cried out and said, He is truly the Son of God, who cures all diseases only by his word, and to whom the devils are altogether subject. Some of them farther said, This power can proceed from none but God.",
+      "verses": [
+        {"chapter": 4, "verse": 33},
+        {"chapter": 4, "verse": 34},
+        {"chapter": 4, "verse": 35},
+        {"chapter": 4, "verse": 36},
+        {"chapter": 4, "verse": 37},
+        {"chapter": 4, "verse": 38},
+        {"chapter": 4, "verse": 39},
+        {"chapter": 4, "verse": 40},
+        {"chapter": 4, "verse": 41},
+        {"chapter": 4, "verse": 42}
+      ]
+    },
+    {
+      "chapter_numbers": [4,4,4,4],
+      "verse_numbers": [43,44,45,46],
+      "combined_text": "Pilate said to the Jews, Why are not the devils subject to your doctors? Some of them said, The power of subjecting devils cannot proceed but from God. But others said to Pilate, That he had raised Lazarus from the dead, after he had been four days in his grave. The governor hearing this, trembling, said to the multitude of the Jews, What will it profit you to shed innocent blood?",
+      "verses": [
+        {"chapter": 4, "verse": 43},
+        {"chapter": 4, "verse": 44},
+        {"chapter": 4, "verse": 45},
+        {"chapter": 4, "verse": 46}
+      ]
+    }
+  ]
+}

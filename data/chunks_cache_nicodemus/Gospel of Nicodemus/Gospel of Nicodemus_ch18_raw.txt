@@ -1,0 +1,31 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [18, 18, 18, 18, 18, 18, 18, 18, 18, 18],
+      "verse_numbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "combined_text": "persecuting Christ and bringing him to hell. as a recompence for taking away Adam and his sons. THEN the prince of hell took Satan, and with great indignation said to him, O thou prince of destruction, author of Beelzebub's defeat and banishment, the scorn of God's angels and loathed by all righteous persons! What inclined thee to act thus? Thou wouldst crucify the King of Glory, and by his destruction, hast made us promises of very large advantages, but as a fool wert ignorant of what thou wast about. For behold now that Jesus of Nazareth, with the brightness of his glorious divinity, puts to flight all the horrid powers of darkness and death; He has broke down our prisons from top to bottom, dismissed all the captives, released all who were bound, and all who were wont formerly to groan under the weight of their torments, have now insulted us, and we are like to be defeated by their prayers. Our impious dominions are subdued, and no part of mankind is now left in our subjection, but on the other hand, they all boldly defy us; Though, before, the dead never durst behave themselves insolently towards us, nor being prisoners, could ever on any occasion be merry. O Satan, thou prince of all the wicked, father of the impious and abandoned, why wouldest thou attempt this exploit, seeing our prisoners were hitherto always without the least hope of salvation and life? But now there is not one of them does ever groan, nor is there the least appearance of a tear in any of their faces. O prince Satan, thou great keeper of the infernal regions, all thy advantages which thou didst acquire by the forbidden tree, and the loss of Paradise, thou hast now lost by the wood of the cross; And thy happiness all then expired, when thou didst crucify Jesus Christ the King of Glory.",
+      "verses": [
+        {"chapter": 18, "verse": 1},
+        {"chapter": 18, "verse": 2},
+        {"chapter": 18, "verse": 3},
+        {"chapter": 18, "verse": 4},
+        {"chapter": 18, "verse": 5},
+        {"chapter": 18, "verse": 6},
+        {"chapter": 18, "verse": 7},
+        {"chapter": 18, "verse": 8},
+        {"chapter": 18, "verse": 9},
+        {"chapter": 18, "verse": 10}
+      ]
+    },
+    {
+      "chapter_numbers": [18, 18, 18, 18],
+      "verse_numbers": [11, 13, 14],
+      "combined_text": "Thou hast acted against thine own interest and mine, as thou wilt presently perceive by those large torments and infinite punishments which thou art about to suffer. author of death, and source of all pride, thou shouldest first have inquired into the evil crimes of Jesus of Nazareth, and then thou wouldest have found that he was guilty of no fault worthy of death. Why didst thou venture, without either reason or justice, to crucify him, and hast brought down to our regions a person innocent and righteous, and thereby hast lost all the sinners, impious and unrighteous persons in the whole world? While the prince of hell was thus speaking to Satan, the King of Glory said to Beelzebub the prince of hell, Satan the prince shall he subject to thy dominions for ever, in the room of Adam and his righteous sons, who are mine,",
+      "verses": [
+        {"chapter": 18, "verse": 11},
+        {"chapter": 18, "verse": 13},
+        {"chapter": 18, "verse": 14}
+      ]
+    }
+  ]
+}

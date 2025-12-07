@@ -1,0 +1,38 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [13, 13, 13, 13],
+      "verse_numbers": [1, 2, 3, 4],
+      "combined_text": "O LORD Jesus and Father, who art God, also the resurrection and life of the dead, give us leave to declare thy mysteries, which we saw after death, belonging to thy cross; for we are sworn by thy name. For thou hast forbidden thy servants to declare the secret things, which were wrought by thy divine power in hell. When we were Placed with our fathers in the dept of hell, in the blackness of darkness, on a sudden there appeared the colour of the sun like gold, and a substantial purple-coloured light enlightening the place. Presently upon this, Adam, the father of all mankind, with all the patriarchs and prophets, rejoiced and said, That light is the author of everlasting light, who hath promised to translate us to everlasting light.",
+      "verses": [
+        {"chapter": 13, "verse": 1},
+        {"chapter": 13, "verse": 2},
+        {"chapter": 13, "verse": 3},
+        {"chapter": 13, "verse": 4}
+      ]
+    },
+    {
+      "chapter_numbers": [13, 13, 13, 13],
+      "verse_numbers": [5, 6, 7, 9],
+      "combined_text": "Then Isaiah the prophet cried out and said, This is the light of the Father, and the Son of God, according to my prophecy, when I was alive upon earth. The land of Zabulon, and the land of Nephthalim, beyond Jordan, a people who walked in darkness, saw a great light; and to them who dwelled in the region of the shadow of death, light is arisen. And now he is come, and hath enlightened us who sat in death. And while we were all rejoicing in the light which shone upon us, our father Simeon came among us, and congratulating all the company, said, Glorify the Lord Jesus Christ the Son of God. an infant in the temple, and being moved by the Holy Ghost, said to him, and acknowledged, That now mine eyes have seen thy salvation, which thou hast prepared before the face of all people; a light to enlighten the Gentiles, and the glory of thy people Israel. All the saints who were in the depth of hell, hearing this, rejoiced the more.",
+      "verses": [
+        {"chapter": 13, "verse": 5},
+        {"chapter": 13, "verse": 6},
+        {"chapter": 13, "verse": 7},
+        {"chapter": 13, "verse": 9}
+      ]
+    },
+    {
+      "chapter_numbers": [13, 13, 13, 13, 13, 13],
+      "verse_numbers": [10, 11, 12, 13, 14],
+      "combined_text": "Afterwards there came forth one like a little hermit, and was asked by every one, Who art thou? To which he replied, I am the voice of one crying in the wilderness, John the Baptist, and the prophet of the Most High, who went before his coming to prepare his way, to give the knowledge of salvation to his people for the forgiveness of sins. And I, John, when I saw Jesus coming to me, being moved by the Holy Ghost, I said, Behold the Lamb of God, behold him who takes away the sins of the world. And I baptized him in the river Jordan, and saw the Holy Ghost descending upon him in the form of a dove, and heard a voice from heaven saying, This is my beloved Son, in whom I am well pleased. And now while I was going before him, I came down hither to acquaint you, that the Son of God will next visit us, and, as the day-spring from on high, will come to us, who are in darkness and the shadow of death.",
+      "verses": [
+        {"chapter": 13, "verse": 10},
+        {"chapter": 13, "verse": 11},
+        {"chapter": 13, "verse": 12},
+        {"chapter": 13, "verse": 13},
+        {"chapter": 13, "verse": 14}
+      ]
+    }
+  ]
+}

@@ -6,8 +6,8 @@ export default function AIPage() {
   return (
     <div className="space-y-8">
       <div className="grid lg:grid-cols-2 gap-6">
-        <LexicalSearchCard />
         <ConceptHybridSearchCard />
+        <LexicalSearchCard />
       </div>
       <div className="grid lg:grid-cols-2 gap-6">
         <SimilarTextsCard />
@@ -76,8 +76,8 @@ function LexicalSearchCard() {
 
   return (
     <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
-      <h2 className="font-medium">Lexical Search</h2>
-      <p className="text-sm text-zinc-500">Exact / fuzzy word & phrase matching across scriptures.</p>
+      <h2 className="font-medium">Search for a word or phrase</h2>
+      <p className="text-sm text-zinc-500">Exact or fuzzy matching across scriptures.</p>
       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-start">
         <div className="col-span-1 sm:col-span-2 lg:col-span-4">
           <textarea
@@ -85,7 +85,7 @@ function LexicalSearchCard() {
             onChange={e=>{ setQuery(e.target.value); autoExpand(e.target) }}
             onKeyDown={onKeyDown}
             ref={el=>autoExpand(el)}
-            placeholder="Exact/fuzzy words or phrase (Ctrl+Enter to search)"
+            placeholder="Search for a word or phrase (Ctrl+Enter to search)"
             className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 px-4 py-3 text-sm leading-relaxed resize-none overflow-hidden"
             style={{ minHeight: 90 }}
           />
@@ -688,7 +688,7 @@ function AskQuestionCard() {
   }
   return (
     <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
-      <h2 className="font-medium">Concept & Hybrid Search</h2>
+      <h2 className="font-medium">Ask a Question</h2>
       <p className="text-sm text-zinc-500">Semantic exploration (optionally hybrid with expansion & lexical boost).</p>
       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-start">
         <div className="col-span-1 sm:col-span-2 lg:col-span-4">

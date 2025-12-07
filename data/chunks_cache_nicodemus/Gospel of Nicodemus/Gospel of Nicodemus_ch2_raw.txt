@@ -1,0 +1,49 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [2,2,2,2,2],
+      "verse_numbers": [1,2,3,4,5],
+      "combined_text": "NOW when Pilate saw this, he was afraid, and was about to rise from his seat. But while he thought to rise, his own wife who stood at a distance, sent to him, saying, Have thou nothing to do with that just man; for I have suffered much concerning him in a vision this night. When the Jews heard this they said to Pilate, Did we not say unto thee, He is a conjuror? Behold, he hath caused thy wife to dream. Pilate then calling Jesus, said, thou hast heard what they testify against thee, and makest no answer? Jesus replied, If they had not a power of speaking, they could not have spoke; but because every one has the command of his own tongue, to speak both good and bad, let him look to it.",
+      "verses": [
+        {"chapter":2,"verse":1},
+        {"chapter":2,"verse":2},
+        {"chapter":2,"verse":3},
+        {"chapter":2,"verse":4},
+        {"chapter":2,"verse":5}
+      ]
+    },
+    {
+      "chapter_numbers": [2,2,2,2,2],
+      "verse_numbers": [6,7,8,9,10],
+      "combined_text": "But the elders of the Jews answered, and said to Jesus, What shall we look to? In the first place, we know this concerning thee, that thou wast born through fornication; secondly, that upon the account of thy birth the infants were slain in Bethlehem; thirdly, that thy father and mother Mary fled into Egypt, because they could not trust their own people. Some of the Jews who stood by spake more favourably, We cannot say that he was born through fornication; but we know that his mother Mary was betrothed to Joseph, and so he was not born through fornication. Then said Pilate to the Jews who affirmed him to be born through fornication, This your account is not true, seeing there was a betrothment, as they testify who are of your own nation. Annas and Caiphas spake to Pilate, All this multitude of people is to be regarded, who cry out, that he was born through fornication, and is a conjurer; but they who deny him to be born through fornication, are his proselytes and disciples.",
+      "verses": [
+        {"chapter":2,"verse":6},
+        {"chapter":2,"verse":7},
+        {"chapter":2,"verse":8},
+        {"chapter":2,"verse":9},
+        {"chapter":2,"verse":10}
+      ]
+    },
+    {
+      "chapter_numbers": [2,2,2,2,2],
+      "verse_numbers": [11,12,13,14,15],
+      "combined_text": "Pilate answered Annas and Caiphas, Who are the proselytes? They answered, They are those who are the children of Pagans, and are not become Jews, but followers of him. Then replied Eleazer, and Asterius, and Antonius, and James, Caras and Samuel, Isaac and Phinees, Crispus and Agrippa, Annas and Judas, We are not proselytes, but children of Jews, and speak the truth, and were present when Mary was betrothed. Then Pilate addressing himself to the twelve men who spake this, said to them, I conjure you by the life of Caesar, that ye faithfully declare whether he was born through fornication, and those things be true which ye have related. They answered Pilate, We have a law whereby we are forbid to swear, it being a sin: Let them swear by the life of Caesar that it is not as we have said, and we will be contented to be put to death. Then said Annas and Caiphas to Pilate, Those twelve men will not believe that we know him to be basely born, and to be a conjurer, although he pretends that he is the Son of God, and a king: which we are so far from believing, that we tremble to hear.",
+      "verses": [
+        {"chapter":2,"verse":11},
+        {"chapter":2,"verse":12},
+        {"chapter":2,"verse":13},
+        {"chapter":2,"verse":14},
+        {"chapter":2,"verse":15}
+      ]
+    },
+    {
+      "chapter_numbers": [2,2],
+      "verse_numbers": [16,17],
+      "combined_text": "Then Pilate commanded every one to go out except the twelve men who said he was not born through fornication, and Jesus to withdraw to a distance, and said to them, Why have the Jews a mind to kill Jesus? They answered him, They are angry because he wrought cures on the sabbath day. Pilate said, Will they kill him for a good work? They say unto him, Yes, Sir.",
+      "verses": [
+        {"chapter":2,"verse":16},
+        {"chapter":2,"verse":17}
+      ]
+    }
+  ]
+}

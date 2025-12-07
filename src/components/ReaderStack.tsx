@@ -221,6 +221,8 @@ function SuggestionsCard({ paneIndex, card }: { paneIndex: number; card: Extract
   const toggleCollapse = useReaderStore((s: ReaderState) => s.toggleCollapse)
   const moveCard = useReaderStore((s: ReaderState) => s.moveCard)
   const reorderCard = useReaderStore((s: ReaderState) => s.reorderCard)
+  const addChapterToNextPane = useReaderStore((s: ReaderState) => s.addChapterToNextPane)
+  const suggestionsToAdd = useReaderStore((s: ReaderState) => s.suggestionsToAdd)
   const [books, setBooks] = useState<any[]>([])
   const list = useReaderStore((s: ReaderState) => s.panes[paneIndex])
   const index = useReaderStore((s: ReaderState) => s.panes[paneIndex].findIndex(c => c.key === card.key))
@@ -293,6 +295,7 @@ function SuggestionsCard({ paneIndex, card }: { paneIndex: number; card: Extract
           onClick={()=>toggleCollapse(paneIndex, card.key)}
           onKeyDown={(e)=>{ if(e.key==='Enter' || e.key===' ') toggleCollapse(paneIndex, card.key) }}
         >{title}</div>
+        <div className="text-[10px] text-zinc-500">Showing {Math.min(suggestions.length, suggestionsToAdd)} of {suggestionsToAdd}</div>
         <div className="flex items-center gap-2 text-[10px]">
           <button className="px-2 py-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-900" onClick={(e)=>{ e.stopPropagation(); toggleCollapse(paneIndex, card.key)}}>{card.collapsed ? 'Expand' : 'Collapse'}</button>
           {/* movement controls removed */}
@@ -305,16 +308,7 @@ function SuggestionsCard({ paneIndex, card }: { paneIndex: number; card: Extract
             <div className="text-sm text-zinc-500 p-2">No suggestions.</div>
           ) : (
             <ul className="space-y-2 text-sm">
-              {suggestions.map((s:any,i:number)=> {
-                const groups = (() => {
-                  const by: Record<string, any[]> = {}
-                  for (const v of (s.verses || [])) {
-                    const key = v?.chunk_id || `verse:${v?.id}`
-                    if (!by[key]) by[key] = []
-                    by[key].push(v)
-                  }
-                  return Object.values(by)
-                })()
+              {suggestions.slice(0, suggestionsToAdd).map((s:any,i:number)=> {
                 return (
                   <li key={i} className="rounded-md border border-zinc-200 dark:border-zinc-800 p-2">
                     <div className="font-medium">
@@ -326,12 +320,18 @@ function SuggestionsCard({ paneIndex, card }: { paneIndex: number; card: Extract
                       })()}
                     </div>
                     <div className="mt-1 space-y-1">
-                      {groups.map((g:any[], gi:number)=> (
-                        <div key={gi} className="text-zinc-600 dark:text-zinc-400">
-                          {g.map((v:any)=>v.text).join('  ')}
-                        </div>
-                      ))}
+                      <div className="text-zinc-600 dark:text-zinc-400">
+                        {(s.verses || []).map((v:any)=> v.text).join('  ')}
+                      </div>
                     </div>
+                    {s.chapter?.id && (
+                      <div className="mt-2">
+                        <button
+                          className="text-xs rounded-md border border-zinc-200 dark:border-zinc-800 px-2 py-1 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                          onClick={()=> addChapterToNextPane(s.chapter.id)}
+                        >Read Full Chapter</button>
+                      </div>
+                    )}
                   </li>
                 )
               })}

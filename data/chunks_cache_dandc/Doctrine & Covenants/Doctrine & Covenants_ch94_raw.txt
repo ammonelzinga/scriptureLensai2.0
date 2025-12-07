@@ -1,0 +1,49 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [94,94,94],
+      "verse_numbers": [1,2,3],
+      "combined_text": "And again, verily I say unto you, my friends, a commandment I give unto you, that ye shall commence a work of laying out and preparing a beginning and foundation of the city of the stake of Zion, here in the land of Kirtland, beginning at my house. And behold, it must be done according to the pattern which I have given unto you. And let the first lot on the south be consecrated unto me for the building of a house for the presidency, for the work of the presidency, in obtaining revelations; and for the work of the ministry of the presidency, in all things pertaining to the church and kingdom.",
+      "verses": [
+        {"chapter":94,"verse":1},
+        {"chapter":94,"verse":2},
+        {"chapter":94,"verse":3}
+      ]
+    },
+    {
+      "chapter_numbers": [94,94,94,94,94,94],
+      "verse_numbers": [4,5,6,7,8,9],
+      "combined_text": "Verily I say unto you, that it shall be built fifty-five by sixty-five feet in the width thereof and in the length thereof, in the inner court. And there shall be a lower court and a higher court, according to the pattern which shall be given unto you hereafter. And it shall be dedicated unto the Lord from the foundation thereof, according to the order of the priesthood, according to the pattern which shall be given unto you hereafter. And it shall be wholly dedicated unto the Lord for the work of the presidency. And ye shall not suffer any unclean thing to come in unto it; and my glory shall be there, and my presence shall be there. But if there shall come into it any unclean thing, my glory shall not be there; and my presence shall not come into it.",
+      "verses": [
+        {"chapter":94,"verse":4},
+        {"chapter":94,"verse":5},
+        {"chapter":94,"verse":6},
+        {"chapter":94,"verse":7},
+        {"chapter":94,"verse":8},
+        {"chapter":94,"verse":9}
+      ]
+    },
+    {
+      "chapter_numbers": [94,94,94],
+      "verse_numbers": [10,11,12],
+      "combined_text": "And again, verily I say unto you, the second lot on the south shall be dedicated unto me for the building of a house unto me, for the work of the printing of the translation of my scriptures, and all things whatsoever I shall command you. And it shall be fifty-five by sixty-five feet in the width thereof and the length thereof, in the inner court; and there shall be a lower and a higher court. And this house shall be wholly dedicated unto the Lord from the foundation thereof, for the work of the printing, in all things whatsoever I shall command you, to be holy, undefiled, according to the pattern in all things as it shall be given unto you.",
+      "verses": [
+        {"chapter":94,"verse":10},
+        {"chapter":94,"verse":11},
+        {"chapter":94,"verse":12}
+      ]
+    },
+    {
+      "chapter_numbers": [94,94,94,94,94],
+      "verse_numbers": [13,14,15,16,17],
+      "combined_text": "And on the third lot shall my servant Hyrum Smith receive his inheritance. And on the first and second lots on the north shall my servants Reynolds Cahoon and Jared Carter receive their inheritances— That they may do the work which I have appointed unto them, to be a committee to build mine houses, according to the commandment, which I, the Lord God, have given unto you. These two houses are not to be built until I give unto you a commandment concerning them. And now I give unto you no more at this time. Amen.",
+      "verses": [
+        {"chapter":94,"verse":13},
+        {"chapter":94,"verse":14},
+        {"chapter":94,"verse":15},
+        {"chapter":94,"verse":16},
+        {"chapter":94,"verse":17}
+      ]
+    }
+  ]
+}

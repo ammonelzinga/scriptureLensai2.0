@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { embedText, chatSummary } from '@/lib/openai'
+import { embedText } from '@/lib/openai'
 import { supabaseAdmin } from '@/lib/supabase'
 
 // Concept/hybrid search returning top chunk cards (each card is a chunk)
@@ -335,12 +335,5 @@ export async function POST(req: NextRequest) {
   cards.sort((a,b)=> (b.score ?? 0) - (a.score ?? 0))
   const limited = typeof topK === 'number' && topK > 0 ? cards.slice(0, topK) : cards
 
-  // Summarize briefly from the combined texts of top cards
-  let overview: string | null = null
-  try {
-    const snippet = limited.map(r => `[${r.chunk.book_title || 'Book'} ${r.chunk.start_chapter}${r.chunk.end_chapter && r.chunk.end_chapter!==r.chunk.start_chapter ? '–'+r.chunk.end_chapter : ''}] ${r.combined_text.slice(0, 400)}`).join(' \n ')
-    overview = await chatSummary('Briefly summarize common themes (2-4 sentences).', snippet)
-  } catch {}
-
-  return NextResponse.json({ chunks: limited, overview, hybrid })
+  return NextResponse.json({ chunks: limited, hybrid })
 }

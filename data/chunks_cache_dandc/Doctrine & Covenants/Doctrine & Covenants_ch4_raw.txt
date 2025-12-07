@@ -1,0 +1,25 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [4, 4, 4],
+      "verse_numbers": [1, 2, 3],
+      "combined_text": "Now behold, a marvelous work is about to come forth among the children of men. Therefore, O ye that embark in the service of God, see that ye serve him with all your heart, might, mind and strength, that ye may stand blameless before God at the last day. Therefore, if ye have desires to serve God ye are called to the work;",
+      "verses": [
+        {"chapter": 4, "verse": 1},
+        {"chapter": 4, "verse": 2},
+        {"chapter": 4, "verse": 3}
+      ]
+    },
+    {
+      "chapter_numbers": [4, 4, 4, 4],
+      "verse_numbers": [4, 5, 6, 7],
+      "combined_text": "For behold the field is white already to harvest; and lo, he that thrusteth in his sickle with his might, the same layeth up in store that he perisheth not, but bringeth salvation to his soul; And faith, hope, charity and love, with an eye single to the glory of God, qualify him for the work. Remember faith, virtue, knowledge, temperance, patience, brotherly kindness, godliness, charity, humility, diligence. Ask, and ye shall receive; knock, and it shall be opened unto you. Amen.",
+      "verses": [
+        {"chapter": 4, "verse": 4},
+        {"chapter": 4, "verse": 5},
+        {"chapter": 4, "verse": 6},
+        {"chapter": 4, "verse": 7}
+      ]
+    }
+  ]
+}

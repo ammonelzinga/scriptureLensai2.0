@@ -1,0 +1,29 @@
+[
+  {
+    "chapter_numbers": [
+      2,
+      2,
+      2
+    ],
+    "verse_numbers": [
+      1,
+      2,
+      3
+    ],
+    "combined_text": "Behold, I will reveal unto you the Priesthood, by the hand of Elijah the prophet, before the coming of the great and dreadful day of the Lord. And he shall plant in the hearts of the children the promises made to the fathers, and the hearts of the children shall turn to their fathers. If it were not so, the whole earth would be utterly wasted at his coming.",
+    "verses": [
+      {
+        "chapter": 2,
+        "verse": 1
+      },
+      {
+        "chapter": 2,
+        "verse": 2
+      },
+      {
+        "chapter": 2,
+        "verse": 3
+      }
+    ]
+  }
+]

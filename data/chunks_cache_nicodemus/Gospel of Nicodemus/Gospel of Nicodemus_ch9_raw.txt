@@ -1,0 +1,39 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [9,9,9,9],
+      "verse_numbers": [1,2,3,4],
+      "combined_text": "WHEN the unjust Jews heard that Joseph had begged and buried the body of Jesus, they sought after Nicodemus, and those fifteen men who had testified before the governor, that Jesus was not born through fornication, and other good persons who had shown any good actions towards him. But when they all concealed themselves through fear of the Jews, Nicodemus alone showed himself to them, and said, How can such persons as these enter into the synagogue? The Jews answered him, But how durst thou enter into the synagogue, who wast a confederate with Christ? Let thy lot be along with him in the other world. Nicodemus answered, Amen; so may it be, that I may have my lot with him in his kingdom.",
+      "verses": [
+        {"chapter":9,"verse":1},
+        {"chapter":9,"verse":2},
+        {"chapter":9,"verse":3},
+        {"chapter":9,"verse":4}
+      ]
+    },
+    {
+      "chapter_numbers": [9,9,9,9,9,9],
+      "verse_numbers": [5,6,7,8,9,10],
+      "combined_text": "In like manner Joseph, when he came to the Jews, said to them, Why are ye angry with me for desiring the body of Jesus of Pilate? Behold, I have put him in my tomb, and wrapped him up in clean linen, and put a stone at the door of the sepulchre: I have acted rightly towards him; but ye have acted unjustly against that just person, in crucifying him, giving him vinegar to drink, crowning him with thorns, tearing his body with whips, and praying down the guilt of his blood upon you. The Jews at the hearing of this were disquieted and troubled; and they seized Joseph, and commanded him to be put in custody before the Sabbath, and kept there till the Sabbath was over. And they said to him, Make confession; for at this time it is not lawful to do thee any harm, till the first day of the week come. But we know that thou wilt not be thought worthy of a burial; but we will give thy flesh to the birds of the air, and the beasts of the earth. Joseph answered, That speech is like the speech of proud Goliath, who reproached the living God in speaking against David. But ye scribes and doctors know that God saith by the prophet, Vengeance is mine, and I will repay to you evil equal to that which ye have threatened to me. The God whom you have hanged upon the cross, is able to deliver me out of your hands. All your wickedness will return upon you.",
+      "verses": [
+        {"chapter":9,"verse":5},
+        {"chapter":9,"verse":6},
+        {"chapter":9,"verse":7},
+        {"chapter":9,"verse":8},
+        {"chapter":9,"verse":9},
+        {"chapter":9,"verse":10}
+      ]
+    },
+    {
+      "chapter_numbers": [9,9,9,9],
+      "verse_numbers": [11,12,13,14],
+      "combined_text": "For the governor, when he washed his hands, said, I am clear from the blood of this just person. But ye answered and cried out, His blood be upon us and our children. According as ye have said, may ye perish for ever. The elders of the Jews hearing these words, were exceedingly enraged; and seizing Joseph, they put him into a chamber where there was no window; they fastened the door, and put a seal upon the lock; And Annas and Caiaphas placed a guard upon it, and took counsel with the priests and Levites, that they should all meet after the Sabbath, and they contrived to what death they should put Joseph. When they had done this, the rulers, Annas and Caiaphas, ordered Joseph to be brought forth. (In this place there is a portion of the Gospel lost or omitted. which cannot be supplied. It may, nevertheless, be surmised from the occurrence related in the next chapter, that the order of Annas and Caiaphas were rendered unnecessary by Joseph's miraculous escape, and which was announced to an assembly of people.)",
+      "verses": [
+        {"chapter":9,"verse":11},
+        {"chapter":9,"verse":12},
+        {"chapter":9,"verse":13},
+        {"chapter":9,"verse":14}
+      ]
+    }
+  ]
+}

@@ -26,8 +26,8 @@ export function AISidebar({ open, onClose }:{ open:boolean; onClose:()=>void }){
             For Concept Search, we recommend showing at least 30 results and expanding the text for each to review context.
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            <LexicalSearchCard />
             <ConceptHybridSearchCard />
+            <LexicalSearchCard />
           </div>
         </div>
       </div>
@@ -123,8 +123,8 @@ function LexicalSearchCard() {
 
   return (
     <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
-      <h2 className="font-medium">Lexical Search</h2>
-      <p className="text-sm text-zinc-500">Exact / fuzzy word & phrase matching across scriptures.</p>
+      <h2 className="font-medium">Search for a word or phrase</h2>
+      <p className="text-sm text-zinc-500">Exact or fuzzy matching across scriptures.</p>
       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
         <div className="col-span-1 sm:col-span-2">
           <textarea
@@ -132,7 +132,7 @@ function LexicalSearchCard() {
             onChange={e=>{ setQuery(e.target.value); autoExpand(e.target) }}
             onKeyDown={onKeyDown}
             ref={el=>autoExpand(el)}
-            placeholder="Exact/fuzzy words or phrase (Ctrl+Enter to search)"
+            placeholder="Search for a word or phrase (Ctrl+Enter to search)"
             className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 px-4 py-3 text-sm leading-relaxed resize-none overflow-hidden"
             style={{ minHeight: 90 }}
           />
@@ -496,7 +496,7 @@ function AskQuestionCard() {
   }
   return (
     <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
-      <h2 className="font-medium">Concept & Hybrid Search</h2>
+      <h2 className="font-medium">Ask a Question</h2>
       <p className="text-sm text-zinc-500">Semantic exploration (optionally hybrid with expansion & lexical boost).</p>
       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
         <div className="col-span-1 sm:col-span-2">
@@ -695,7 +695,7 @@ function AskQuestionCard() {
           <button type="button" className="text-xs underline" onClick={()=>setShowMore(v=>!v)}>{showMore ? 'Hide filters' : 'More filters'}</button>
         </div>
         <div>
-          <button disabled={!q||busy||!!rangeError} onClick={run} className="w-full rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50">{busy?'Exploring…':'Explore'}</button>
+          <button disabled={!q||busy||!!rangeError} onClick={run} className="w-full rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50">{busy?'Asking…':'Ask'}</button>
         </div>
       </div>
       {rangeError && <div className="mt-2 text-xs text-red-600">{rangeError}</div>}

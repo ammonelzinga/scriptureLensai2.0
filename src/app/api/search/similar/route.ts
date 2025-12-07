@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { chatSummary, embedText } from '@/lib/openai'
+import { embedText } from '@/lib/openai'
 
 // Similar verses given a verseId using chunk-level embeddings
 export async function POST(req: NextRequest) {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     p_book_seq_min: bookSeqMin ?? null,
     p_book_seq_max: bookSeqMax ?? null,
   })
-  let rows = (data || []) as Array<{ verse_id: string; book_id: string; chapter_seq: number; verse_seq: number; text: string; chunk_score: number }>
+  let rows = (data || []) as Array<{ verse_id: string; book_id: string; chapter_seq: number; verse_seq: number; text: string; chunk_id: string; chunk_score: number }>
   // Fallback: if RPC failed or returned no rows, use the verse text embedding directly
   if (error || rows.length === 0) {
     try {
@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
           chapter_seq: r.chapter_seq,
           verse_seq: r.verse_seq,
           text: r.text,
+          chunk_id: r.match_chunk || r.chunk_id || null,
           chunk_score: r.chunk_score ?? r.score ?? 0
         }))
       }
@@ -73,39 +74,53 @@ export async function POST(req: NextRequest) {
     rows = rows.filter(r => workByBook.get(r.book_id) !== targetWorkId)
   }
 
-  // Group by chapter (book_id + chapter_seq)
-  const groups = new Map<string, Array<typeof rows[number]>>()
+  // Group by chunk_id to return whole chunks (3-10 verses)
+  const groups = new Map<string, { book_id: string; chapter_seq: number; chunk_score: number }>()
   for (const r of rows) {
-    const k = `${r.book_id}:${r.chapter_seq}`
-    if (!groups.has(k)) groups.set(k, [])
-    groups.get(k)!.push(r)
+    if (!r.chunk_id) continue
+    const k = r.chunk_id
+    const existing = groups.get(k)
+    if (!existing || (r.chunk_score ?? 0) > (existing.chunk_score ?? 0)) {
+      groups.set(k, { book_id: r.book_id, chapter_seq: r.chapter_seq, chunk_score: r.chunk_score ?? 0 })
+    }
   }
-  // Lookup chapter ids for linking
-  const bookIds = Array.from(new Set(rows.map(r => r.book_id)))
+  const chunkIds = Array.from(groups.keys())
+  // Fetch all verses for matched chunks
+  const { data: chunkVerses } = await sb.from('verses')
+    .select('id, book_id, chapter_seq, verse_seq, text, chunk_id')
+    .in('chunk_id', chunkIds)
+    .order('chapter_seq', { ascending: true })
+    .order('verse_seq', { ascending: true })
+  const versesByChunk = new Map<string, Array<any>>()
+  for (const v of (chunkVerses || [])) {
+    const k = (v as any).chunk_id
+    if (!versesByChunk.has(k)) versesByChunk.set(k, [])
+    versesByChunk.get(k)!.push(v)
+  }
+  // Lookup chapter ids for linking (from the first verse's chapter)
+  const chKeys = Array.from(new Set(Array.from(versesByChunk.values()).map(list => {
+    const first = list[0]
+    return first ? `${first.book_id}:${first.chapter_seq}` : null
+  }).filter(Boolean) as string[]))
+  const bookIds = Array.from(new Set(chKeys.map(k => k.split(':')[0])))
   const { data: chapters } = await sb.from('chapters').select('id, book_id, seq, title').in('book_id', bookIds)
   const chapterMap = new Map<string, any>((chapters || []).map((c: any) => [`${c.book_id}:${c.seq}`, c]))
-
-  // Build suggestions: top up to 3 verses per chapter group
-  const suggestions = Array.from(groups.entries()).map(([k, list]) => {
-    const ch = chapterMap.get(k)
-    const topVerses = list
-      .sort((a,b)=> (b.chunk_score ?? 0) - (a.chunk_score ?? 0))
-      .slice(0, 3)
-      .map(v => ({ id: v.verse_id, seq: v.verse_seq, text: v.text }))
-    return {
-      chapter: ch ? { id: ch.id, title: ch.title, seq: ch.seq, book_id: ch.book_id } : { id: null, title: null, seq: Number(k.split(':')[1]), book_id: k.split(':')[0] },
-      verses: topVerses
-    }
-  })
+  // Build suggestions: one entry per chunk with full verses
+  const suggestions = Array.from(groups.entries())
+    .sort((a,b)=> (b[1].chunk_score ?? 0) - (a[1].chunk_score ?? 0))
+    .map(([chunkId, meta]) => {
+      const list = versesByChunk.get(chunkId) || []
+      const chKey = list.length ? `${list[0].book_id}:${list[0].chapter_seq}` : `${meta.book_id}:${meta.chapter_seq}`
+      const ch = chapterMap.get(chKey)
+      return {
+        chapter: ch ? { id: ch.id, title: ch.title, seq: ch.seq, book_id: ch.book_id } : { id: null, title: null, seq: Number(chKey.split(':')[1]), book_id: chKey.split(':')[0] },
+        chunk_id: chunkId,
+        verses: list.map(v => ({ id: v.id, seq: v.verse_seq, text: v.text }))
+      }
+    })
   // Flatten ids for highlighting
   const relevantVerseIds = suggestions.flatMap(s => s.verses.map(v => v.id))
 
   // Optional short summary
-  let summary: string | null = null
-  try {
-    const context = suggestions.map(s => `[${s.chapter.title || `Chapter ${s.chapter.seq}`}] ${s.verses.map(v=>v.text).join(' | ')}`).join(' ; ')
-    summary = await chatSummary('Briefly (1-2 sentences) describe how these passages relate to the target.', `Target: ${target?.text || ''}\n${context}`)
-  } catch {}
-
-  return NextResponse.json({ suggestions, summary, relevantVerseIds })
+  return NextResponse.json({ suggestions, relevantVerseIds })
 }

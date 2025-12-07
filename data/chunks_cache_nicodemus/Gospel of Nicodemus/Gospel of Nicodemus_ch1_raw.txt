@@ -1,0 +1,64 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [1,1,1,1,1,1,1,1,1,1],
+      "verse_numbers": [1,2,3,4,5,6,7,8,9,10],
+      "combined_text": "of healing on the Sabbath. who does him honour. ANNAS and Caiphas, and Summas, and Datam, Gamaliel, Judas, Levi, Nepthalim, Alexander, Cyrus, and other Jews, went to Pilate about Jesus, accusing him with many bad crimes. And said, We are assured that Jesus is the son of Joseph, the carpenter, and born of Mary, and that he declares himself the Son of God, and a king; and not only so, but attempts the dissolution of the Sabbath, and the laws of our fathers. Pilate replied, What is it which he declares? and what is it which he attempts dissolving? The Jews told him, We have a law which forbids doing cures on the Sabbath day; but he cures both the lame and the deaf, those afflicted with the palsy, the blind, the lepers, and demoniacs, on that day, by wicked methods. Pilate replied, How can he do this by wicked methods? They answered He is a conjurer, and casts out devils by the prince of the devils; and so all things, become subject to him. Then said Pilate, Casting out devils seems not to be the work of an unclean spirit, but to proceed from the power of God. The Jews replied to Pilate, We entreat your highness to summon him to appear before your tribunal, and hear him yourself. Then Pilate called a messenger, and said to him, By what means will Christ be brought hither? Then went the messenger forth, and knowing Christ, worshipped him; and having spread the cloak which he had in his hand upon the ground, he said, Lord, walk upon this, and go in, for the governor calls thee. When the Jews perceived what the messenger had done, they exclaimed (against him) to Pilate, and said, Why did you not give him his summons by a beadle, and not by a messenger?--For the messenger, when he saw him, worshipped him, and spread the cloak which he had in his hand upon the ground before him, and said to him, Lord, the governor calls thee.",
+      "verses": [
+        {"chapter":1,"verse":1},
+        {"chapter":1,"verse":2},
+        {"chapter":1,"verse":3},
+        {"chapter":1,"verse":4},
+        {"chapter":1,"verse":5},
+        {"chapter":1,"verse":6},
+        {"chapter":1,"verse":7},
+        {"chapter":1,"verse":8},
+        {"chapter":1,"verse":9},
+        {"chapter":1,"verse":10}
+      ]
+    },
+    {
+      "chapter_numbers": [1,1,1,1,1,1,1,1,1,1],
+      "verse_numbers": [11,12,13,14,15,16,17,18,19,20],
+      "combined_text": "Then Pilate called the messenger, and said, Why hast thou done thus? The messenger replied, When thou sentest me from Jerusalem to Alexander, I saw Jesus sitting in a mean figure upon a she-ass, and the children of the Hebrews cried out, Hosannah, holding boughs of trees in their hands. Others spread their garments in the way, and said, Save us, thou who art in heaven; blessed is he who cometh in the name of the Lord. Then the Jews cried out, against the messenger, and said, The children of the Hebrews made their acclamations in the Hebrew language; and how couldst thou, who art a Greek, understand the Hebrew? The messenger answered them and said, I asked one of the Jews and said, What is this which the children do cry out in the Hebrew language? And he explained it to me, saying, they cry out, Hosannah, which being interpreted, is, O Lord, save me; or, O Lord, save. Pilate then said to them, Why do you yourselves testify to the words spoken by the children, namely, by your silence? In what has the messenger done amiss? And they were silent. Then the governor said unto the messenger, Go forth and endeavour by any means to bring him in. But the messenger went forth and did as before; and said, Lord come in, for the governor calleth thee. And as Jesus was going in by the ensigns, who carried the standards, the tops of them bowed down and worshipped Jesus.",
+      "verses": [
+        {"chapter":1,"verse":11},
+        {"chapter":1,"verse":12},
+        {"chapter":1,"verse":13},
+        {"chapter":1,"verse":14},
+        {"chapter":1,"verse":15},
+        {"chapter":1,"verse":16},
+        {"chapter":1,"verse":17},
+        {"chapter":1,"verse":18},
+        {"chapter":1,"verse":19},
+        {"chapter":1,"verse":20}
+      ]
+    },
+    {
+      "chapter_numbers": [1,1,1,1,1,1,1,1,1,1],
+      "verse_numbers": [21,22,23,24,25,26,27,28,29,30],
+      "combined_text": "Whereupon the Jews exclaimed more vehemently against the ensigns. But Pilate said to the Jews, I know it is not pleasing to you that the tops of the standards did of themselves bow and worship Jesus; but why do ye exclaim against the ensigns, as if they had bowed and worshipped? They replied to Pilate, We saw the ensigns themselves bowing and worshipping Jesus. Then the governor called the ensigns, and said unto them, Why did you do thus? The ensigns said to Pilate, We are all Pagans and worship the gods in temples; and how should we think anything about worshipping him? We only held the standards in our hands, and they bowed themselves and worshipped him. Then said Pilate to the rulers of the synagogue, Do ye yourselves choose some strong men, and let them hold the standards, and we shall see whether they will then bend of themselves. So the elders of the Jews sought out twelve of the most strong and able old men, and made them hold the standards, and they stood in the presence of the governor. Then Pilate said to the messenger, Take Jesus out, and by some means bring him in again. And Jesus and the messenger went out of the hall. And Pilate called the ensigns who before had borne the standards, and swore to them, that if they had not borne the standards in that manner when Jesus before entered in, he would cut off their heads. Then the governor commanded Jesus to come in again.",
+      "verses": [
+        {"chapter":1,"verse":21},
+        {"chapter":1,"verse":22},
+        {"chapter":1,"verse":23},
+        {"chapter":1,"verse":24},
+        {"chapter":1,"verse":25},
+        {"chapter":1,"verse":26},
+        {"chapter":1,"verse":27},
+        {"chapter":1,"verse":28},
+        {"chapter":1,"verse":29},
+        {"chapter":1,"verse":30}
+      ]
+    },
+    {
+      "chapter_numbers": [1,1,1,1,1,1],
+      "verse_numbers": [31,32],
+      "combined_text": "And the messenger did as he had done before, and very much entreated Jesus that he would go upon his cloak, and walk on it; and he did walk upon it, and went in. And when Jesus went in, the standards bowed themselves as before, and worshipped him.",
+      "verses": [
+        {"chapter":1,"verse":31},
+        {"chapter":1,"verse":32}
+      ]
+    }
+  ]
+}

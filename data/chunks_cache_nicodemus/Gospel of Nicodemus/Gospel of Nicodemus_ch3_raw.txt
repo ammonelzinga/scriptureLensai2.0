@@ -1,0 +1,39 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [3,3,3,3,3],
+      "verse_numbers": [1,2,3,4,5],
+      "combined_text": "THEN Pilate, filled with anger, went out of the hall, and said to the Jews, I call the whole world to witness that I find no fault in that man. The Jews replied to Pilate, If he had not been a wicked person, we had not brought him before thee. Pilate said to them, Do ye take him and try him by your law. Then the Jews said, It is not lawful for us to put any one to death. Pilate said to the Jews, The command, therefore, thou shalt not kill, belongs to you, but not to me.",
+      "verses": [
+        {"chapter": 3, "verse": 1},
+        {"chapter": 3, "verse": 2},
+        {"chapter": 3, "verse": 3},
+        {"chapter": 3, "verse": 4},
+        {"chapter": 3, "verse": 5}
+      ]
+    },
+    {
+      "chapter_numbers": [3,3,3,3,3],
+      "verse_numbers": [6,7,8,9,10],
+      "combined_text": "And he went again into the hall, and called Jesus by himself, and said to him, Art thou the king of the Jews? And Jesus answering, said to Pilate, Dost thou speak this of thyself, or did the Jews tell it thee concerning me? Pilate answering, said to Jesus, Am I a Jew? The whole nation and rulers of the Jews have delivered thee up to me. What hast thou done? Jesus answering, said, My kingdom is not of this world: if my kingdom were of this world, then would my servants fight, and I should not have been delivered to the Jews: but now my kingdom is not from hence. Pilate said, Art thou a king then? Jesus answered, Thou sayest that I am a king: to this end was I born, and for this end came I into the world; and for this purpose I came, that I should bear witness to the truth; and every one who is of the truth, heareth my voice.",
+      "verses": [
+        {"chapter": 3, "verse": 6},
+        {"chapter": 3, "verse": 7},
+        {"chapter": 3, "verse": 8},
+        {"chapter": 3, "verse": 9},
+        {"chapter": 3, "verse": 10}
+      ]
+    },
+    {
+      "chapter_numbers": [3,3,3,3],
+      "verse_numbers": [11,12,13,14],
+      "combined_text": "Pilate saith to him, What is truth? Jesus said, Truth is from heaven. Pilate said, Therefore truth is not on earth. Jesus saith to Pilate, Believe that truth is on earth among those, who when they have the power of judgment, are governed by truth, and form right judgment.",
+      "verses": [
+        {"chapter": 3, "verse": 11},
+        {"chapter": 3, "verse": 12},
+        {"chapter": 3, "verse": 13},
+        {"chapter": 3, "verse": 14}
+      ]
+    }
+  ]
+}

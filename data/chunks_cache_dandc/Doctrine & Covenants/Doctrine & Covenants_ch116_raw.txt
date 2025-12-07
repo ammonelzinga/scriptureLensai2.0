@@ -1,0 +1,10 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [116],
+      "verse_numbers": [1],
+      "combined_text": "Spring Hill is named by the Lord Adam-ondi-Ahman, because, said he, it is the place where Adam shall come to visit his people, or the Ancient of Days shall sit, as spoken of by Daniel the prophet.",
+      "verses": [ {"chapter": 116, "verse": 1} ]
+    }
+  ]
+}

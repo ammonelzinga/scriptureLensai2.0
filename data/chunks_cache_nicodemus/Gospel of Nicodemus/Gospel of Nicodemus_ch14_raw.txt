@@ -1,0 +1,26 @@
+{
+  "chunks": [
+    {
+      "chapter_numbers": [14, 14, 14],
+      "verse_numbers": [1, 2, 3],
+      "combined_text": "from Michael the archangel, when he sent him to Paradise to entreat God to anoint his head in his sickness. BUT when the first man our father Adam heard these things, that Jesus was baptized in Jordan, he called out to his son Seth, and said, Declare to your sons, the patriarchs and prophets, all those things, which thou didst hear from Michael, the archangel, when I sent thee to the gates of Paradise, to entreat God that he would annoint my head when I was sick. Then Seth, coming near to the patriarchs and prophets, said, I, Seth, when I was praying to God at the gates of Paradise, beheld the angel of the Lord, Michael, appear unto me, saying, I am sent unto thee from the Lord; I am appointed to preside over human bodies.",
+      "verses": [
+        {"chapter": 14, "verse": 1},
+        {"chapter": 14, "verse": 2},
+        {"chapter": 14, "verse": 3}
+      ]
+    },
+    {
+      "chapter_numbers": [14, 14, 14, 14, 14],
+      "verse_numbers": [4, 5, 6, 7, 8],
+      "combined_text": "I tell thee, Seth, do not pray to God in tears, and entreat him for the oil of the tree of mercy wherewith to anoint thy father Adam for his head-ache; Because thou canst not by any means obtain it till the last day and times, namely, till five thousand and five hundred years be past. Then will Christ, the most merciful Son of God, come on earth to raise again the human body of Adam, and at the same time to raise the bodies of the dead, and when he cometh he will be baptized in Jordan; Then with the oil of his mercyhe will anoint all those who believe in him; and the oil of his mercy will continue to future generations, for those who shall be born of the water and the Holy Ghost unto eternal life. And when at that time the most merciful Son of God, Christ Jesus, shall come down on earth, he will introduce our father Adam into Paradise, to the tree of mercy. prophets heard all these things from Seth, they rejoiced more.",
+      "verses": [
+        {"chapter": 14, "verse": 4},
+        {"chapter": 14, "verse": 5},
+        {"chapter": 14, "verse": 6},
+        {"chapter": 14, "verse": 7},
+        {"chapter": 14, "verse": 8}
+      ]
+    }
+  ]
+}
