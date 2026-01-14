@@ -382,11 +382,13 @@ function AskQuestionCard() {
   const [hybrid, setHybrid] = useState<boolean>(false)
   const [pinVerseId, setPinVerseId] = useState<string>('')
   const [lexicalWeight, setLexicalWeight] = useState<number>(0.15)
+  const [minQuestionSimilarity, setMinQuestionSimilarity] = useState<number>(0.3)
   const [traditionsOpen, setTraditionsOpen] = useState(false)
   const [sourcesOpen, setSourcesOpen] = useState(false)
   const [worksOpen, setWorksOpen] = useState(false)
   const [booksOpen, setBooksOpen] = useState(false)
   const [compactFilters, setCompactFilters] = useState(false)
+  const [similarQuestions, setSimilarQuestions] = useState<{ id:string; text:string; similarity:number }[]>([])
 
   useEffect(() => { fetch('/api/catalog/traditions').then(r=>r.json()).then(j=>setTraditions(j.traditions||[])) }, [])
   useEffect(() => {
@@ -468,6 +470,7 @@ function AskQuestionCard() {
       if (hybrid) payload.lexicalWeight = lexicalWeight
       const pinTrim = pinVerseId.trim()
       if (pinTrim) payload.verseId = pinTrim
+      payload.minQuestionSimilarity = minQuestionSimilarity
       if (traditionIds.length) payload.traditionIds = traditionIds
       if (sourceIds.length) payload.sourceIds = sourceIds
       if (bookIds.length) payload.bookIds = bookIds
@@ -481,7 +484,50 @@ function AskQuestionCard() {
         if (bEnd) payload.bookSeqMax = bEnd.seq
       }
       const res = await fetch('/api/ai/question', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      const json = await res.json(); setData(json)
+      const json = await res.json();
+      if (Array.isArray(json.similarQuestions) && json.similarQuestions.length) {
+        setSimilarQuestions(json.similarQuestions)
+        setData(null)
+      } else {
+        setSimilarQuestions([])
+        setData(json)
+      }
+    } finally { setBusy(false) }
+  }
+  const runUsePrior = async (useQuestionId: string) => {
+    setBusy(true)
+    try {
+      const unlimited = topK === 'all'
+      const payload: any = { question: q, useQuestionId, topK: unlimited ? -1 : Number(topK), versesPerChapter, hybrid }
+      if (hybrid) payload.lexicalWeight = lexicalWeight
+      const pinTrim = pinVerseId.trim()
+      if (pinTrim) payload.verseId = pinTrim
+      if (traditionIds.length) payload.traditionIds = traditionIds
+      if (sourceIds.length) payload.sourceIds = sourceIds
+      if (bookIds.length) payload.bookIds = bookIds
+      if (workIds.length) payload.workIds = workIds
+      if (rangeStart) { const bStart = books.find(b => b.id === rangeStart); if (bStart) payload.bookSeqMin = bStart.seq }
+      if (rangeEnd) { const bEnd = books.find(b => b.id === rangeEnd); if (bEnd) payload.bookSeqMax = bEnd.seq }
+      const res = await fetch('/api/ai/question', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      const json = await res.json(); setData(json); setSimilarQuestions([])
+    } finally { setBusy(false) }
+  }
+  const runForceNew = async () => {
+    setBusy(true)
+    try {
+      const unlimited = topK === 'all'
+      const payload: any = { question: q, forceNew: true, topK: unlimited ? -1 : Number(topK), versesPerChapter, hybrid }
+      if (hybrid) payload.lexicalWeight = lexicalWeight
+      const pinTrim = pinVerseId.trim()
+      if (pinTrim) payload.verseId = pinTrim
+      if (traditionIds.length) payload.traditionIds = traditionIds
+      if (sourceIds.length) payload.sourceIds = sourceIds
+      if (bookIds.length) payload.bookIds = bookIds
+      if (workIds.length) payload.workIds = workIds
+      if (rangeStart) { const bStart = books.find(b => b.id === rangeStart); if (bStart) payload.bookSeqMin = bStart.seq }
+      if (rangeEnd) { const bEnd = books.find(b => b.id === rangeEnd); if (bEnd) payload.bookSeqMax = bEnd.seq }
+      const res = await fetch('/api/ai/question', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      const json = await res.json(); setData(json); setSimilarQuestions([])
     } finally { setBusy(false) }
   }
   const autoExpand = (el: HTMLTextAreaElement | null) => {
@@ -557,6 +603,13 @@ function AskQuestionCard() {
               ))}
             </div>
           )}
+        </div>
+        <div className="col-span-1 sm:col-span-2">
+          <div className="flex items-center gap-3 text-xs">
+            <span className="text-zinc-600 dark:text-zinc-400">Min question similarity</span>
+            <input type="range" min={0.1} max={1} step={0.05} value={minQuestionSimilarity} onChange={e=>setMinQuestionSimilarity(Number(e.target.value))} />
+            <span className="tabular-nums">{minQuestionSimilarity.toFixed(2)}</span>
+          </div>
         </div>
         <div className="col-span-1 sm:col-span-2">
           <div className="flex items-center justify-between">
@@ -707,6 +760,27 @@ function AskQuestionCard() {
             const eLabel = e ? `${e.seq}. ${e.title}` : 'End'
             return `${sLabel} → ${eLabel}`
           })()}
+        </div>
+      )}
+      {similarQuestions.length>0 && (
+        <div className="mt-3 border border-amber-200 dark:border-amber-800 rounded-md p-3 bg-amber-50 dark:bg-amber-900/20">
+          <div className="text-sm font-medium mb-2">Similar questions found</div>
+          <ul className="space-y-2">
+            {similarQuestions.map((s)=> (
+              <li key={s.id} className="text-sm">
+                <div className="flex items-center justify-between">
+                  <div className="mr-2">{s.text}</div>
+                  <div className="flex items-center gap-2 text-[11px]">
+                    <span>sim: {Number(s.similarity).toFixed(2)}</span>
+                    <button type="button" className="underline" onClick={()=>runUsePrior(String(s.id))}>Use this</button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-2 text-[11px] flex items-center gap-3">
+            <button type="button" className="underline" onClick={runForceNew}>Use my question instead</button>
+          </div>
         </div>
       )}
       {data?.overview && (

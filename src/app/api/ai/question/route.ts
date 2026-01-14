@@ -21,13 +21,51 @@ export async function POST(req: NextRequest) {
     sourceIds,
     bookSeqMin,
     bookSeqMax,
-    verseId
+    verseId,
+    // New: suggestions flow
+    minQuestionSimilarity = 0.3,
+    useQuestionId,
+    forceNew = false,
   } = body || {}
   if (!question) return NextResponse.json({ error: 'Missing question' }, { status: 400 })
 
   const sb = supabaseAdmin()
-  // Embed query
-  const qVec = await embedText(question)
+  let qVec: number[] | null = null
+
+  // If user chose an existing question, reuse its stored embedding
+  if (useQuestionId) {
+    const { data: qrow, error: qerr } = await sb
+      .from('user_questions')
+      .select('id, embedding, text')
+      .eq('id', useQuestionId)
+      .limit(1)
+      .maybeSingle()
+    if (qerr) return NextResponse.json({ error: qerr.message }, { status: 500 })
+    if (!qrow || !qrow.embedding) return NextResponse.json({ error: 'Selected question not found' }, { status: 404 })
+    qVec = qrow.embedding as any
+  } else if (!forceNew) {
+    // Before embedding, check lexically similar prior questions (top 3)
+    const { data: similarQs, error: simErr } = await sb.rpc('lexical_search_questions', {
+      q: question,
+      min_sim: Math.max(0.1, Math.min(1, Number(minQuestionSimilarity) || 0.3)),
+      match_count: 3,
+    })
+    if (simErr) return NextResponse.json({ error: simErr.message }, { status: 500 })
+    if (Array.isArray(similarQs) && similarQs.length > 0) {
+      // Return suggestions; client can confirm one to reuse embedding
+      return NextResponse.json({ similarQuestions: similarQs })
+    }
+  }
+
+  // Embed query (or reuse selected embedding)
+  if (!qVec) qVec = await embedText(question)
+
+  // If we embedded a new question (i.e., not using prior id), store it for future reuse
+  if (!useQuestionId) {
+    try {
+      await sb.from('user_questions').insert({ text: String(question), embedding: qVec })
+    } catch {}
+  }
   // Fetch plenty of verses to allow grouping by chunk then trimming
   const approxNeeded = typeof topK === 'number' && topK > 0 ? Math.max(50, topK * Math.max(versesPerChapter, 1) * 2) : 100
   type Row = { verse_id: string; book_id: string; chapter_seq: number; verse_seq: number; text: string; combined_score: number; chunk_id: string; chunk_score: number; lexical_score: number }
@@ -334,6 +372,5 @@ export async function POST(req: NextRequest) {
 
   cards.sort((a,b)=> (b.score ?? 0) - (a.score ?? 0))
   const limited = typeof topK === 'number' && topK > 0 ? cards.slice(0, topK) : cards
-
   return NextResponse.json({ chunks: limited, hybrid })
 }

@@ -351,3 +351,34 @@ do $$ begin if not exists (select 1 from pg_policies where schemaname='public' a
 -- * Functions provided for semantic search by query embedding or verse id.
 -- * Use cosine distance ordering: ORDER BY embedding <-> query_vector (via <=> for distance then 1 - for similarity).
 -- =============================================
+
+-- =============================================
+-- User Questions (store asked questions and their embeddings)
+-- =============================================
+create table if not exists user_questions (
+  id uuid primary key default gen_random_uuid(),
+  text text not null,
+  embedding vector(512) not null,
+  created_at timestamptz default now()
+);
+-- Lexical index for fast trigram similarity on question text
+create index if not exists user_questions_text_trgm_idx on user_questions using gin (text gin_trgm_ops);
+
+-- Lexical search for similar user questions
+create or replace function lexical_search_questions(
+  q text,
+  min_sim float default 0.1,
+  match_count int default 3
+)
+returns table (id uuid, text text, similarity float)
+language sql stable as $$
+  select uq.id, uq.text, similarity(uq.text, q) as similarity
+  from user_questions uq
+  where uq.text % q and similarity(uq.text, q) >= min_sim
+  order by similarity(uq.text, q) desc
+  limit match_count
+$$;
+
+-- Row Level Security and read policy
+alter table user_questions enable row level security;
+do $$ begin if not exists (select 1 from pg_policies where schemaname='public' and tablename='user_questions' and policyname='read_user_questions') then create policy read_user_questions on user_questions for select using (true); end if; end $$;
